@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Roulette japan voice</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+  <!-- plugin -->
+  <link rel="stylesheet" href="css/L.Control.ZoomLabel.css" />
+  <script src="js/L.Control.ZoomLabel.js"></script>
+  <!-- plugin -->
+  <link rel="stylesheet" media="screen" href="css/styles.css">
+  
+</head>
+<body>
+  <img id="speaker_icon" src='img/icon_120980_256.png'>
+  <div id="count_down"></div>
+  <a class="btn btn-border" id="btn_id">PUSH</a>
+  <div class="roulette_container" id="roulette"></div>
+  <div id="answer"></div>
+  <div class="zoom_feature_all_btn" id="zoomstyle">全体</div>
+
+  <div id="mapid"></div>
+  <script src="prefectures.js"></script>
+  <script src="js/roulette.js"></script>
+
+</body>
+</html>

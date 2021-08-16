@@ -1,0 +1,146 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+html, body {
+  height: 100%;
+  width: 100vw;
+
+}
+
+#mapid {
+  top: 5%;
+  height: 80%;
+  width: 47vw;
+  z-index: 299;
+  opacity: 1;
+  margin: auto;
+
+}
+
+.info {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+.info h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+
+.zoom_feature_all_btn {
+  position: absolute;
+  width: 30px;
+  height: 20px;
+  border: solid 1px;
+  background-color: #9e9a9a;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 12px;
+  color: #3c3d3e;
+  font-weight: bold;
+  box-shadow: 2;
+  z-index: 303;
+  text-align: center;
+  cursor: pointer;
+  top: 120px;
+  left: 27%;
+  border: none;
+  user-select: none;
+}
+
+#count_down {
+  position: absolute;
+  font-size: 200px;
+  /* float: left; */
+  top: 10%;
+  left: 0;
+  right: 8%;
+  margin: auto;
+  text-align: center;
+  opacity: 0.4;
+  z-index: 400;
+  pointer-events: none;
+}
+
+#speaker_icon {
+  position: absolute;
+  top: 120px;
+  height: 50px;
+  right: 28%;
+  cursor: pointer;
+  z-index: 300;
+}
+
+.roulette_container {
+  right: 28%;
+  top: 220px;
+  /* margin-top: 100px; */
+  font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
+  font-weight: bold;
+  position: absolute;
+  font-size: 32px;
+  z-index: 302;
+  user-select: none;
+}
+#answer {
+  right: 28%;
+  top: 280px;
+  /* margin-top: 100px; */
+  font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
+  font-weight: bold;
+  position: absolute;
+  color: red;
+  font-size: 30px;
+  z-index: 302;
+  user-select: none;
+  background-color: white;
+  opacity: 0.8;
+}
+
+.select {
+  fill: rgb(255, 0, 0);
+  opacity: 1;
+}
+
+.btn
+{
+  position: absolute;
+  top: 170px;
+  right: 28%;
+  width: 55px;
+  /* margin-top: 50px; */
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.1em;
+  color: #212529;
+  z-index: 301;
+  user-select: none;
+}
+
+a.btn-border {
+  /* border: 1px solid #000; */
+  border-radius: 4px;
+  background: rgb(161, 161, 161);
+}
+
+a.btn-border:hover {
+  color: #fff;
+  background: #000;
+}
+
+.disabled{
+  pointer-events: none;
+}
+
+.leaflet-layer element.style{ 
+  opacity: 0.1;
+} 
+
+

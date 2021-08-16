@@ -6,24 +6,15 @@ const gsi_blank = new L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/blank/{z
   maxZoom: 7
 }).addTo(mymap);
 
+//
 const gsi_map = new L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
   attribution: "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>地理院タイル標準地図</a>",
   opacity:0.7,
   maxZoom: 7
 });
-
-const tcg500k = new L.tileLayer('http://alacarte.tcg.co.jp/tcg500k/WM_CT/tiles/{z}/{x}/{y}.png', {
-  attribution: "<a>TCG500k(2015)</a>",
-  opacity:0.7,
-  maxZoom: 10
-});
-// }).addTo(mymap);
-// L.control.zoomLabel().addTo(map);
-// mymap.setView([35.3622222, 138.7313889], 5);
 mymap.fitBounds([[45.30,126.50],[23.00,143.00]])
 
 const style = (feature) => {
-// const style = {
   return {
     stroke:false,
     weight: 5,
@@ -40,10 +31,9 @@ const highlightFeature = (e) => {//マウスホバーしたポリゴンに対し
     color: '#666',
     // fillOpacity: 1,
   });
-  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {//ブラウザの設定？
+  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
-  // info.update(layer.feature.properties);
 }
 
 const resetHighlight = (e) => {
@@ -53,7 +43,6 @@ const resetHighlight = (e) => {
   // info.update();
 }
 const zoomToFeature = (e) => {// クリックした都道府県を全体表示してズーム
-  // mymap.fitBounds([[46.10,124.00],[23.00,153.00]])
   geojson.setStyle({
     fillOpacity:0.6,
     stroke:false
@@ -62,11 +51,9 @@ const zoomToFeature = (e) => {// クリックした都道府県を全体表示�
     fillOpacity:0.2,
     stroke:true
   })
-
-  window.setTimeout(()=> {
+  window.setTimeout(()=> {//少しだけタイムラグをつけてあげないと表示が同時に行われてしまう。
     mymap.fitBounds([[e.target._bounds._northEast.lat,e.target._bounds._northEast.lng],[e.target._bounds._southWest.lat,e.target._bounds._southWest.lng]]);
   },100)
-  // console.log(e.target)
 }
 
 
@@ -83,22 +70,19 @@ const onEachFeature = (feature, layer) => {
 
 let prefectureClick = null;
 
-geojson = L.geoJSON(prefecturesPoly, {
+geojson = L.geoJSON(prefecturesPoly, {//ポリゴンデータの読み込み
   style: style,
   onEachFeature: onEachFeature
 }).addTo(mymap);
-console.log(geojson)
+// console.log(geojson)
 
 
-const Map_BaseLayer = {
+const Map_BaseLayer = {//basemapの切り替え
   '地理院地図': gsi_map,
   '白地図': gsi_blank,
-  'TCG500k':tcg500k,
 };
 
 const Map_AddLayer = {
-  // '地理院地図': gsi_map,
-  // 'MIERUNE MONO': m_mono,
 };
 
 L.control.layers(Map_BaseLayer, Map_AddLayer,{
@@ -106,11 +90,6 @@ L.control.layers(Map_BaseLayer, Map_AddLayer,{
 }).addTo(mymap);
 
 L.control.zoomLabel({position: 'bottomleft'}).addTo(mymap);
-// L.control
-//   .opacity(Map_AddLayer, {
-//       label: 'Layers Opacity',
-//   })
-//   .addTo(map);
 
 const fitlayer = () => {//全体表示
   const fitBtnEvent = document.getElementById('zoomstyle');
@@ -123,14 +102,13 @@ fitlayer();
 class SelectClass {
   constructor(){
     this.cityList =[];
-    // this.selectNum = null;
     this.roulette = null;
     this.text = null;
     this.jsonObj = null;
     this.selectCity = null;
   };
 
-  makeCityList (){//geojsonから都道府県名を取得してリスト化 20210712
+  makeCityList (){//geojsonから都道府県名を取得してリスト化
     this.prefNamesBefore = prefecturesPoly.features.map(feature => {
       return feature.properties.name
     })
@@ -144,7 +122,6 @@ class SelectClass {
     this.selectNum = Math.floor(Math.random() * 47)//都道府県コードをランダム
     this.selectCity = String(this.cityList[this.selectNum]);//選ばれた都道府県名をリストから文字列で変数に代入
     this.roulette.textContent = `${this.selectCity}`;//県名を画面に表示させる。
-    // console.log('文字表示１：'+this.selectCity)
   };
 
   viewLastPref(){
@@ -152,11 +129,6 @@ class SelectClass {
     this.roulette.textContent = '答え： ' + `${this.selectCity}`;//県名を画面に表示させる。
   }
 
-  clearGsiMap(){
-    // this.mapidStyle = document.getElementById('mapid');
-    // this.mapidStyle.style.opacity = 0.8
-  }
-  
   changeColorSelectPoly () {//ランダムに都道府県を選んでその属性と同じポリゴンの色を変える。
     this.selectPrefectures ()
     geojson.eachLayer(layer => {
@@ -173,7 +145,6 @@ class SelectClass {
     }) 
   }
 
-  
   clearColorSelectPoly () {//つけた色を消す
     geojson.setStyle({
       stroke:false,
@@ -213,16 +184,14 @@ class SelectClass {
 const selectCtyInstance = new SelectClass();
 selectCtyInstance.makeCityList();
 
-// const musicIntro = new Audio('audio/intro.mp3');
+//音の読み込み
 const musicIntro = new Audio('audio/intro_part2.mp3');
-// const musicTypewriter = new Audio('audio/typewriter.mp3')
-const musicTypewriter = new Audio('audio/select_part2.mp3')
-// const musicCountDown =new Audio('audio/countdown.mp3')
+const musicSelected = new Audio('audio/select_part2.mp3')
 const musicCountDown =new Audio('audio/think_part2.mp3')
 
 class AudioClass {
   constructor(){
-    this.speacker = document.getElementById('speaker_icon')
+    this.speacker = document.getElementById('speaker_icon')//スピーカーのアイコンの読み込み
     this.loop = null;
     this.vl = 0.3
     this.speacker.addEventListener('click', () => {
@@ -243,7 +212,6 @@ class AudioClass {
     this.btn = document.getElementById('btn_id')
     this.btn.addEventListener('click', () => {//クリックしたらルーレットがはじまる。
       this.btn.classList.add('disabled')
-      selectCtyInstance.clearGsiMap()
       document.querySelector('#answer').innerHTML = ''
       this.selectMusic();
       this.interval = window.setInterval(() => {
@@ -305,17 +273,17 @@ class AudioClass {
   }
 
   typeCountVolZero () {
-    musicTypewriter.volume = 0;
+    musicSelected.volume = 0;
     musicCountDown.volume = 0;
   }
 
   typeCountVolUp () {
-    musicTypewriter.volume = this.vl;
+    musicSelected.volume = this.vl;
     musicCountDown.volume = this.vl;
   }
   
   selectMusic () {
-    musicTypewriter.play();
+    musicSelected.play();
     musicIntro.volume = 0;
     musicCountDown.pause();
     musicCountDown.currentTime = 0;
@@ -343,16 +311,12 @@ if ('SpeechRecognition' in window) {
 const recognition = new SpeechRecognition();
 const voiceOn = () => {
   recognition.onresult = (event) => {
-    // console.log(selectCtyInstance.cityList)
     this.speechpref = selectCtyInstance.cityList.filter( pref => {
-      // console.log(pref)
       return pref == event.results[0][0].transcript
     });
-    // console.log(event)
     if (speechpref == event.results[0][0].transcript){
       document.querySelector('#answer').innerHTML = event.results[0][0].transcript
     }
   }
   recognition.start();
-  // const answer = document.getElementById('answer')
 }

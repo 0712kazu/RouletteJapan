@@ -143,4 +143,11 @@ a.btn-border:hover {
   opacity: 0.1;
 } 
 
+.terms_of_service{
+  position: absolute;
+  left: 27%;
+  font-size: 4pt;
+  top: 85%;
+}
+
 

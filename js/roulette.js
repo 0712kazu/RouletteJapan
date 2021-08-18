@@ -3,7 +3,7 @@ var mymap = L.map('mapid');
 const gsi_blank = new L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png', {
   attribution: "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>地理院タイル白地図</a>",
   opacity:0.9,
-  maxZoom: 18
+  maxZoom: 7
 }).addTo(mymap);
 
 const gsi_map = new L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {

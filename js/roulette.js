@@ -221,7 +221,7 @@ class AudioClass {
     
       window.setTimeout( () => {//カウントダウンが始まる
         clearInterval(this.interval)
-        voiceOn();
+        // voiceOn();
         selectCtyInstance.clearColorSelectPoly();
         selectCtyInstance.changeColorSelectPoly();
         selectCtyInstance.countDown();
@@ -232,7 +232,7 @@ class AudioClass {
           // selectCtyInstance.selectPrefectures();
           selectCtyInstance.viewLastPref();
           mymap.fitBounds([[45.30,126.50],[23.00,143.00]])
-          recognition.stop()
+          // recognition.stop()
           clearInterval(this.loop);
           if (this.speacker.className === 'speaker_on'){
             musicIntro.pause();
@@ -301,21 +301,21 @@ class AudioClass {
 const audio = new AudioClass();
 
 //ここから音声認識
-SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-if ('SpeechRecognition' in window) {
-  // ユーザのブラウザは音声合成に対応しています。
-} else {
-  // ユーザのブラウザは音声合成に対応していません。
-}
-const recognition = new SpeechRecognition();
-const voiceOn = () => {
-  recognition.onresult = (event) => {
-    this.speechpref = selectCtyInstance.cityList.filter( pref => {
-      return pref == event.results[0][0].transcript
-    });
-    if (speechpref == event.results[0][0].transcript){
-      document.querySelector('#answer').innerHTML = event.results[0][0].transcript
-    }
-  }
-  recognition.start();
-}
+// SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+// if ('SpeechRecognition' in window) {
+//   // ユーザのブラウザは音声合成に対応しています。
+// } else {
+//   // ユーザのブラウザは音声合成に対応していません。
+// }
+// const recognition = new SpeechRecognition();
+// const voiceOn = () => {
+//   recognition.onresult = (event) => {
+//     this.speechpref = selectCtyInstance.cityList.filter( pref => {
+//       return pref == event.results[0][0].transcript
+//     });
+//     if (speechpref == event.results[0][0].transcript){
+//       document.querySelector('#answer').innerHTML = event.results[0][0].transcript
+//     }
+//   }
+//   recognition.start();
+// }

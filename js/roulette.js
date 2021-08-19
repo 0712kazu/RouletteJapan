@@ -136,8 +136,7 @@ class SelectClass {
         // console.log('文字表示２：'+this.selectCity)
         layer.setStyle({
           fillColor:'red',
-          fillOpacity:1
-          ,
+          fillOpacity:1,
           stroke:false
         })
       }
@@ -157,7 +156,7 @@ class SelectClass {
     this.roulette.textContent = ``;//県名を一旦消す。
     geojson.eachLayer(layer => {
       if(layer.feature.properties.name == this.selectCity){
-        mymap.fitBounds([[layer._bounds._northEast.lat*0.99,layer._bounds._northEast.lng*1.01],[layer._bounds._southWest.lat*1.01,layer._bounds._southWest.lng*0.99]]);
+        mymap.fitBounds([[layer._bounds._northEast.lat*0.99,layer._bounds._northEast.lng*1.01],[layer._bounds._southWest.lat*1.01,layer._bounds._southWest.lng*0.99]]);//セレクトされた都道府県をズーム
       }
     }) 
   }

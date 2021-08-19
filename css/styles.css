@@ -6,7 +6,6 @@
   html, body {
     height: 100%;
     width: 100vw;
-
   }
 
   #mapid {
@@ -16,7 +15,6 @@
     z-index: 299;
     opacity: 1;
     margin: auto;
-
   }
 
   .info {

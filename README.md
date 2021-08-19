@@ -1,4 +1,5 @@
 # RouletteJapan
+プレビュー　https://0712kazu.github.io/RouletteJapan/index.html
 A game to guess the prefectures of Japan
 ボタンを押すと日本の都道府県がランダムで選ばれるので５秒以内に答えるゲームです。
 初心者が作りましたのでご愛嬌ください。

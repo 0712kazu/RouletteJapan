@@ -135,7 +135,7 @@ class SelectClass {
     if(this.cityLastList.length === 0){
       this.cityLastList = this.cityList.slice();
     }
-    console.log(this.cityLastList)
+    // console.log(this.cityLastList)
     // console.log(this.cityList)
   }
 
@@ -252,14 +252,14 @@ class AudioClass {
       window.setTimeout( () => {//カウントダウンが始まる
         clearInterval(this.interval)
         // voiceOn();
-        musicCountDown.play();
+        // musicCountDown.play();
         selectCtyInstance.clearColorSelectPoly();
         selectCtyInstance.changeColorLastSelectPoly();
         selectCtyInstance.countDown();
         selectCtyInstance.clearRouletteText();
         
         window.setTimeout(() => {//答えが出てもとに戻る
-          // this.btn.classList.remove('disabled');
+          this.btn.classList.remove('disabled');
           // selectCtyInstance.selectPrefectures();
           selectCtyInstance.viewLastPref();
           selectCtyInstance.checkLastCityList();
@@ -269,9 +269,9 @@ class AudioClass {
           if (this.speacker.className === 'speaker_on'){
             this.playIntroMusic();
           }
-          window.setTimeout(() => {
-            this.btn.classList.remove('disabled');//musicCountdownが流れ終わったらボタンが復帰
-          },800);
+          // window.setTimeout(() => {
+          //   this.btn.classList.remove('disabled');//musicCountdownが流れ終わったらボタンが復帰
+          // },800);
         },5000);
       }, 2000);
     })
@@ -326,13 +326,17 @@ class AudioClass {
   selectMusic () {
     musicIntro.muted = true;
     this.selectMusicPlay();
-    // musicCountDown.pause();
+    musicCountDown.pause();
     musicCountDown.currentTime = 0;
     if (this.speacker.className === 'speaker_on') {
       this.typeCountVolUp();
     }else{
       this.typeCountMute();
     }
+    window.setTimeout(()=> {
+      musicCountDown.play();
+      // console.log("countdown１")
+    },2000)
   }
 }
 

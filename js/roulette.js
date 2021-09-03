@@ -135,8 +135,6 @@ class SelectClass {
     if(this.cityLastList.length === 0){
       this.cityLastList = this.cityList.slice();
     }
-    // console.log(this.cityLastList)
-    // console.log(this.cityList)
   }
 
   changeColorLastSelectPoly () {//答えが同じものが出ない様に調整
@@ -325,6 +323,8 @@ class AudioClass {
   
   selectMusic () {
     musicIntro.muted = true;
+    musicCountDown.play();
+    musicCountDown.muted = true;
     this.selectMusicPlay();
     musicCountDown.pause();
     musicCountDown.currentTime = 0;
@@ -333,7 +333,7 @@ class AudioClass {
     }else{
       this.typeCountMute();
     }
-    window.setTimeout(()=> {
+    window.setTimeout(()=> {//musicCountDownが終わるタイミングとボタンの復帰をずらすためここにsettimeoutする。
       musicCountDown.play();
       // console.log("countdown１")
     },2000)

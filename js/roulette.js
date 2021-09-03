@@ -259,7 +259,6 @@ class AudioClass {
         selectCtyInstance.clearRouletteText();
         
         window.setTimeout(() => {//答えが出てもとに戻る
-          // musicCountDown.pause();
           // this.btn.classList.remove('disabled');
           // selectCtyInstance.selectPrefectures();
           selectCtyInstance.viewLastPref();
@@ -271,9 +270,8 @@ class AudioClass {
             this.playIntroMusic();
           }
           window.setTimeout(() => {
-            musicCountDown.pause();
-            this.btn.classList.remove('disabled');
-          },500);
+            this.btn.classList.remove('disabled');//musicCountdownが流れ終わったらボタンが復帰
+          },800);
         },5000);
       }, 2000);
     })

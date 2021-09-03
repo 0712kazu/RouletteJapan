@@ -241,7 +241,7 @@ class AudioClass {
     this.btn = document.getElementById('btn_id')
     this.btn.addEventListener('click', () => {//クリックしたらルーレットがはじまる。
       this.btn.classList.add('disabled')
-      this.btn.disabled = true;
+      this.btn.disabled = true;//ボタンdisable
       document.querySelector('#answer').innerHTML = ''
       this.selectMusic();
       this.interval = window.setInterval(() => {

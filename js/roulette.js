@@ -222,6 +222,7 @@ class AudioClass {
     this.speacker = document.getElementById('speaker_icon')//スピーカーのアイコンの読み込み
     this.loop = null;
     this.vl = 0.3
+    this.btn = document.getElementById('btn_id')
     this.speacker.addEventListener('click', () => {
       clearInterval(this.loop);
       musicIntro.pause();

@@ -234,7 +234,7 @@ class AudioClass {
           this.onSpeaker();
         }else {
           this.onSpeaker();
-          this.playIntro();
+          this.playIntroMusic();
         }
       }
     });
@@ -246,7 +246,6 @@ class AudioClass {
       this.selectMusic();
       this.interval = window.setInterval(() => {
         selectCtyInstance.clearColorSelectPoly();
-        // selectCtyInstance.selectPrefectures();
         selectCtyInstance.changeColorSelectPoly();
       },80)
     
@@ -257,6 +256,8 @@ class AudioClass {
         selectCtyInstance.changeColorLastSelectPoly();
         selectCtyInstance.countDown();
         selectCtyInstance.clearRouletteText();
+        musicCountDown.play();
+
         
         window.setTimeout(() => {//答えが出てもとに戻る
           this.btn.classList.remove('disabled');
@@ -267,8 +268,7 @@ class AudioClass {
           // recognition.stop()
           clearInterval(this.loop);
           if (this.speacker.className === 'speaker_on'){
-            musicIntro.pause();
-            this.playIntro();
+            this.playIntroMusic();
           }
         },5000);
       }, 2000);
@@ -279,7 +279,7 @@ class AudioClass {
     this.speacker.classList.remove('speaker_on')
     this.speacker.src ='img/icon_120980_256.png'
     musicIntro.muted = true;
-    this.typeCountVolZero();
+    this.typeCountMute();
   }
   
   onSpeaker () {
@@ -288,23 +288,23 @@ class AudioClass {
     this.typeCountVolUp();
   }
   
-  playIntro () {
-    this.introPlay();
+  playIntroMusic () {
+    this.introOn();
     musicIntro.muted = false;
     musicIntro.volume = 0.1;
     this.loop = window.setInterval(()=> {
       musicIntro.pause();
-      this.introPlay();
+      this.introOn();
     // },36200)//intro.mp3の場合
     },8740)//intro_part2.mp3の場合(BPM110:4小節)
   }
   
-  introPlay () {
+  introOn () {
     musicIntro.currentTime = 0;
     musicIntro.play();
   }
 
-  typeCountVolZero () {
+  typeCountMute () {
     musicSelected.muted = true;
     musicCountDown.muted = true;
   }
@@ -324,12 +324,8 @@ class AudioClass {
     if (this.speacker.className === 'speaker_on') {
       this.typeCountVolUp();
     }else{
-      this.typeCountVolZero();
+      this.typeCountMute();
     }
-    window.setTimeout(()=> {
-      musicCountDown.play();
-      // console.log("countdown１")
-    },2000)
   }
 }
 

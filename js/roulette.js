@@ -222,6 +222,7 @@ class AudioClass {
     this.speacker = document.getElementById('speaker_icon')//スピーカーのアイコンの読み込み
     this.loop = null;
     this.vl = 0.3
+    this.btn = document.getElementById('btn_id')
     this.speacker.addEventListener('click', () => {
       clearInterval(this.loop);
       musicIntro.pause();
@@ -240,6 +241,7 @@ class AudioClass {
     this.btn = document.getElementById('btn_id')
     this.btn.addEventListener('click', () => {//クリックしたらルーレットがはじまる。
       this.btn.classList.add('disabled')
+      this.btn.disabled = true;
       document.querySelector('#answer').innerHTML = ''
       this.selectMusic();
       this.interval = window.setInterval(() => {
@@ -258,6 +260,7 @@ class AudioClass {
         
         window.setTimeout(() => {//答えが出てもとに戻る
           this.btn.classList.remove('disabled');
+          this.btn.disabled = false;
           // selectCtyInstance.selectPrefectures();
           selectCtyInstance.viewLastPref();
           selectCtyInstance.checkLastCityList();

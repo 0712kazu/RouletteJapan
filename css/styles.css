@@ -108,10 +108,10 @@
   .btn
   {
     position: absolute;
-    top: 170px;
+    top: 120px;
     right: 1%;
-    width: 55px;
-    /* margin-top: 50px; */
+    width: 80px;
+    margin-top: 50px;
     font-size: 14px;
     font-weight: 700;
     padding: 0.6rem 1rem;
@@ -134,9 +134,9 @@
     background: #000;
   }
 
-  .disabled{
+  /* .disabled{
     pointer-events: none;
-  }
+  } */
 
   .leaflet-layer element.style{ 
     opacity: 0.1;
@@ -150,7 +150,7 @@
   }
 }
 
-@media screen and (min-width: 900px) { /*ウィンドウ幅が769px以上の場合に適用*/
+@media screen and (min-width: 796px) { /*ウィンドウ幅が769px以上の場合に適用*/
   body {
     padding: 0;
     margin: 0;
@@ -262,9 +262,9 @@
   .btn
   {
     position: absolute;
-    top: 170px;
+    /* top: 170px; */
     right: 28%;
-    width: 55px;
+    width: 80px;
     /* margin-top: 50px; */
     font-size: 14px;
     font-weight: 700;
@@ -288,9 +288,9 @@
     background: #000;
   }
 
-  .disabled{
+  /* .disabled{
     pointer-events: none;
-  }
+  } */
 
   .leaflet-layer element.style{ 
     opacity: 0.1;
@@ -442,9 +442,9 @@
     background: #000;
   }
 
-  .disabled{
+  /* .disabled{
     pointer-events: none;
-  }
+  } */
 
   .leaflet-layer element.style{ 
     opacity: 0.1;

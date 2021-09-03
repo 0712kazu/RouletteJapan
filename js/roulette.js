@@ -114,18 +114,50 @@ class SelectClass {
     this.cityList = this.prefNamesBefore.filter(function (x, i, self) {//重複を削除
       return self.indexOf(x) === i;
     });
+    this.cityLastList = this.cityList.slice();
+    // console.log(this.cityLastList)
   };
   
   selectPrefectures () {
     this.roulette = document.getElementById('roulette');
-    this.selectNum = Math.floor(Math.random() * 47)//都道府県コードをランダム
+    this.selectNum = Math.floor(Math.random() * this.cityList.length);//都道府県コードをランダム
     this.selectCity = String(this.cityList[this.selectNum]);//選ばれた都道府県名をリストから文字列で変数に代入
     this.roulette.textContent = `${this.selectCity}`;//県名を画面に表示させる。
   };
 
+  lastSelectpref(){
+    this.roulette = document.getElementById('roulette');//答えが同じものが出ない様に調整
+    this.selectLastCity = this.cityLastList.splice(Math.floor(Math.random() * this.cityLastList.length),1)[0];//都道府県コードをランダム
+    this.roulette.textContent = `${this.selectLastCity}`;//県名を画面に表示させる。
+  }
+  
+  checkLastCityList(){
+    if(this.cityLastList.length === 0){
+      this.cityLastList = this.cityList.slice();
+    }
+    console.log(this.cityLastList)
+    // console.log(this.cityList)
+  }
+
+  changeColorLastSelectPoly () {//答えが同じものが出ない様に調整
+    this.lastSelectpref()
+    geojson.eachLayer(layer => {
+      if(layer.feature.properties.name == this.selectLastCity){
+        // console.log('レイヤー：'+layer.feature.properties.name)
+        // console.log('文字表示２：'+this.selectCity)
+        layer.setStyle({
+          fillColor:'red',
+          fillOpacity:1,
+          stroke:false
+        })
+      }
+    }) 
+  }
+
+
   viewLastPref(){
     this.roulette = document.getElementById('roulette');
-    this.roulette.textContent = '答え： ' + `${this.selectCity}`;//県名を画面に表示させる。
+    this.roulette.textContent = '答え： ' + `${this.selectLastCity}`;//県名を画面に表示させる。
   }
 
   changeColorSelectPoly () {//ランダムに都道府県を選んでその属性と同じポリゴンの色を変える。
@@ -155,10 +187,10 @@ class SelectClass {
   clearRouletteText(layer){
     this.roulette.textContent = ``;//県名を一旦消す。
     geojson.eachLayer(layer => {
-      if(layer.feature.properties.name == this.selectCity){
+      if(layer.feature.properties.name == this.selectLastCity){
         mymap.fitBounds([[layer._bounds._northEast.lat*0.99,layer._bounds._northEast.lng*1.01],[layer._bounds._southWest.lat*1.01,layer._bounds._southWest.lng*0.99]]);//セレクトされた都道府県をズーム
       }
-    }) 
+    })
   }
 
   countDown () {
@@ -222,7 +254,7 @@ class AudioClass {
         clearInterval(this.interval)
         // voiceOn();
         selectCtyInstance.clearColorSelectPoly();
-        selectCtyInstance.changeColorSelectPoly();
+        selectCtyInstance.changeColorLastSelectPoly();
         selectCtyInstance.countDown();
         selectCtyInstance.clearRouletteText();
         
@@ -230,6 +262,7 @@ class AudioClass {
           this.btn.classList.remove('disabled');
           // selectCtyInstance.selectPrefectures();
           selectCtyInstance.viewLastPref();
+          selectCtyInstance.checkLastCityList();
           mymap.fitBounds([[45.30,126.50],[23.00,143.00]])
           // recognition.stop()
           clearInterval(this.loop);

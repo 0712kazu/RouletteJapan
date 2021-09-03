@@ -252,15 +252,15 @@ class AudioClass {
       window.setTimeout( () => {//カウントダウンが始まる
         clearInterval(this.interval)
         // voiceOn();
+        musicCountDown.play();
         selectCtyInstance.clearColorSelectPoly();
         selectCtyInstance.changeColorLastSelectPoly();
         selectCtyInstance.countDown();
         selectCtyInstance.clearRouletteText();
-        musicCountDown.play();
-
         
         window.setTimeout(() => {//答えが出てもとに戻る
-          this.btn.classList.remove('disabled');
+          // musicCountDown.pause();
+          // this.btn.classList.remove('disabled');
           // selectCtyInstance.selectPrefectures();
           selectCtyInstance.viewLastPref();
           selectCtyInstance.checkLastCityList();
@@ -270,6 +270,10 @@ class AudioClass {
           if (this.speacker.className === 'speaker_on'){
             this.playIntroMusic();
           }
+          window.setTimeout(() => {
+            musicCountDown.pause();
+            this.btn.classList.remove('disabled');
+          },500);
         },5000);
       }, 2000);
     })
@@ -293,7 +297,7 @@ class AudioClass {
     musicIntro.muted = false;
     musicIntro.volume = 0.1;
     this.loop = window.setInterval(()=> {
-      musicIntro.pause();
+      // musicIntro.pause();
       this.introOn();
     // },36200)//intro.mp3の場合
     },8740)//intro_part2.mp3の場合(BPM110:4小節)
@@ -315,11 +319,16 @@ class AudioClass {
     musicSelected.volume = 0.25;
     musicCountDown.volume = 0.25;
   }
+
+  selectMusicPlay(){
+    musicSelected.currentTime = 0;
+    musicSelected.play();
+  }
   
   selectMusic () {
-    musicSelected.play();
     musicIntro.muted = true;
-    musicCountDown.pause();
+    this.selectMusicPlay();
+    // musicCountDown.pause();
     musicCountDown.currentTime = 0;
     if (this.speacker.className === 'speaker_on') {
       this.typeCountVolUp();

@@ -278,7 +278,7 @@ class AudioClass {
   offSpeaker () {//実はオフにしても裏でイントロは流れている。
     this.speacker.classList.remove('speaker_on')
     this.speacker.src ='img/icon_120980_256.png'
-    musicIntro.volume = 0;
+    musicIntro.muted = true;
     this.typeCountVolZero();
   }
   
@@ -290,6 +290,7 @@ class AudioClass {
   
   playIntro () {
     this.introPlay();
+    musicIntro.muted = false;
     musicIntro.volume = 0.1;
     this.loop = window.setInterval(()=> {
       musicIntro.pause();
@@ -304,18 +305,20 @@ class AudioClass {
   }
 
   typeCountVolZero () {
-    musicSelected.volume = 0;
-    musicCountDown.volume = 0;
+    musicSelected.muted = true;
+    musicCountDown.muted = true;
   }
 
   typeCountVolUp () {
-    musicSelected.volume = this.vl;
-    musicCountDown.volume = this.vl;
+    musicSelected.muted = false;
+    musicCountDown.muted = false;
+    musicSelected.volume = 0.25;
+    musicCountDown.volume = 0.25;
   }
   
   selectMusic () {
     musicSelected.play();
-    musicIntro.volume = 0;
+    musicIntro.muted = true;
     musicCountDown.pause();
     musicCountDown.currentTime = 0;
     if (this.speacker.className === 'speaker_on') {

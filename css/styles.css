@@ -110,7 +110,7 @@
     position: absolute;
     top: 120px;
     right: 1%;
-    width: 80px;
+    width: 50px;
     margin-top: 50px;
     font-size: 14px;
     font-weight: 700;
@@ -129,14 +129,15 @@
     background: rgb(161, 161, 161);
   }
 
-  a.btn-border:hover {
+  /* a.btn-border:hover {
     color: #fff;
     background: #000;
-  }
-
-  /* .disabled{
-    pointer-events: none;
   } */
+
+  .disabled{
+    pointer-events: none;
+    opacity: 0.5;
+  }
 
   .leaflet-layer element.style{ 
     opacity: 0.1;
@@ -264,7 +265,7 @@
     position: absolute;
     /* top: 170px; */
     right: 28%;
-    width: 80px;
+    width: 48px;
     /* margin-top: 50px; */
     font-size: 14px;
     font-weight: 700;
@@ -283,14 +284,14 @@
     background: rgb(161, 161, 161);
   }
 
-  a.btn-border:hover {
+  /* a.btn-border:hover {
     color: #fff;
     background: #000;
-  }
-
-  /* .disabled{
-    pointer-events: none;
   } */
+
+  .disabled{
+    pointer-events: none;
+  }
 
   .leaflet-layer element.style{ 
     opacity: 0.1;
@@ -437,14 +438,13 @@
     background: rgb(161, 161, 161);
   }
 
-  a.btn-border:hover {
+  /* a.btn-border:hover {
     color: #fff;
     background: #000;
-  }
-  /* 一旦削除 */
-  /* .disabled{
-    pointer-events: none;
   } */
+  .disabled{
+    pointer-events: none;
+  }
 
   .leaflet-layer element.style{ 
     opacity: 0.1;

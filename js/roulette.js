@@ -15,8 +15,10 @@ mymap.fitBounds([[45.30,126.50],[23.00,143.00]])
 
 const style = (feature) => {
   return {
-    stroke:false,
-    weight: 5,
+    // stroke:false,
+    stroke:true,
+    color: '#666',
+    weight: 0.5,
     fillOpacity: 0.8,
     fillColor:'gray'
     };
@@ -28,6 +30,7 @@ const highlightFeature = (e) => {//マウスホバーしたポリゴンに対し
   layer.setStyle({//マウスホバーしたら太字の枠線をつける
     stroke:true,
     color: '#666',
+    weight:3
     // fillOpacity: 1,
   });
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -37,14 +40,15 @@ const highlightFeature = (e) => {//マウスホバーしたポリゴンに対し
 
 const resetHighlight = (e) => {
   geojson.setStyle({
-    stroke:false,
+    // stroke:false,
+    weight:0.5
   });
   // info.update();
 }
 const zoomToFeature = (e) => {// クリックした都道府県を全体表示してズーム
   geojson.setStyle({
     fillOpacity:0.6,
-    stroke:false
+    // stroke:false
   })
   e.target.setStyle({
     fillOpacity:0.2,
@@ -146,7 +150,7 @@ class SelectClass {
         layer.setStyle({
           fillColor:'red',
           fillOpacity:1,
-          stroke:false
+          // stroke:false
         })
       }
     }) 
@@ -167,7 +171,7 @@ class SelectClass {
         layer.setStyle({
           fillColor:'red',
           fillOpacity:1,
-          stroke:false
+          // stroke:false
         })
       }
     }) 
@@ -175,8 +179,8 @@ class SelectClass {
 
   clearColorSelectPoly () {//つけた色を消す
     geojson.setStyle({
-      stroke:false,
-      weight: 5,
+      // stroke:false,
+      weight: 0.5,
       fillOpacity: 0.6,
       fillColor:'gray'
     })
@@ -238,12 +242,11 @@ class AudioClass {
       }
     });
 
-    this.btn = document.getElementById('btn_id')
     this.btn.addEventListener('click', () => {//クリックしたらルーレットがはじまる。
+      this.selectMusic();
       this.btn.classList.add('disabled')
       // this.btn.disabled = true;//ボタンdisable
       document.querySelector('#answer').innerHTML = ''
-      this.selectMusic();
       this.interval = window.setInterval(() => {
         selectCtyInstance.clearColorSelectPoly();
         selectCtyInstance.changeColorSelectPoly();

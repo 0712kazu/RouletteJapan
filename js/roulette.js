@@ -331,9 +331,11 @@ class AudioClass {
     musicIntro.muted = true;
     musicCountDown.play();
     musicCountDown.muted = true;
-    this.selectMusicPlay();
-    musicCountDown.pause();
     musicCountDown.currentTime = 0;
+    window.setTimeout(()=> {//chrome用エラー回避（play()とpause()は同時に書かない）。
+      musicCountDown.pause();
+    },1)
+    this.selectMusicPlay();
     if (this.speacker.className === 'speaker_on') {
       this.typeCountVolUp();
     }else{

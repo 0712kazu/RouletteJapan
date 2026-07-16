@@ -1,459 +1,341 @@
-@media screen and (min-width: 400px) { /*ウィンドウ幅が400px以上の場合に適用*/
-  body {
-    padding: 0;
-    margin: 0;
-  }
-  html, body {
-    height: 100%;
-    width: 100vw;
+:root {
+  color-scheme: light;
+  --ink: #17231c;
+  --muted: #647068;
+  --paper: #f6f2ea;
+  --panel: rgba(255, 255, 255, 0.86);
+  --line: rgba(23, 35, 28, 0.14);
+  --accent: #d94b35;
+  --accent-dark: #a92d1c;
+  --green: #244f3b;
+  --shadow: 0 18px 50px rgba(29, 45, 36, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--paper);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(217, 75, 53, 0.12), transparent 30rem),
+    linear-gradient(135deg, #fbf8f2 0%, #eef2e8 100%);
+  font-family: "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+button,
+select,
+.leaflet-control a {
+  outline-offset: 3px;
+}
+
+button:focus-visible,
+select:focus-visible,
+.leaflet-control a:focus-visible {
+  outline: 3px solid rgba(217, 75, 53, 0.42);
+}
+
+.app-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 20px;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.eyebrow,
+.status-label {
+  margin: 0 0 6px;
+  color: var(--accent-dark);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+h1 {
+  margin: 0;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(2rem, 5vw, 4.1rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.lead {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+}
+
+.icon-button,
+.map-reset,
+.text-button,
+.start-button {
+  border: 0;
+  cursor: pointer;
+}
+
+.icon-button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel);
+  box-shadow: 0 8px 28px rgba(29, 45, 36, 0.08);
+  font-size: 1.25rem;
+}
+
+.game-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 132px;
+  gap: 30px;
+  padding: 24px 26px;
+  border: 1px solid var(--line);
+  border-radius: 24px 24px 0 0;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.game-copy {
+  min-width: 0;
+}
+
+.roulette {
+  min-height: 2.6rem;
+  overflow: hidden;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(1.55rem, 4vw, 2.7rem);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.answer {
+  min-height: 1.5rem;
+  margin-top: 2px;
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.controls {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+}
+
+.prefecture-filter {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.prefecture-filter select {
+  min-width: 140px;
+  min-height: 46px;
+  padding: 0 38px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.start-button {
+  min-width: 140px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  color: white;
+  background: var(--accent);
+  box-shadow: 0 10px 24px rgba(169, 45, 28, 0.24);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.start-button:hover:not(:disabled) {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.start-button:disabled,
+.prefecture-filter select:disabled {
+  cursor: wait;
+  opacity: 0.52;
+}
+
+.map-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 24px 24px;
+  background: #dfe7dc;
+  box-shadow: var(--shadow);
+}
+
+#map {
+  width: 100%;
+  height: min(64vh, 650px);
+  min-height: 430px;
+  background: #e8ede6;
+}
+
+.countdown {
+  position: absolute;
+  z-index: 700;
+  inset: 50% auto auto 50%;
+  pointer-events: none;
+  color: var(--ink);
+  font-family: Georgia, serif;
+  font-size: clamp(8rem, 26vw, 17rem);
+  font-weight: 900;
+  line-height: 0.75;
+  opacity: 0.2;
+  transform: translate(-50%, -50%);
+}
+
+.map-reset {
+  position: absolute;
+  z-index: 800;
+  top: 14px;
+  right: 14px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 18px rgba(29, 45, 36, 0.1);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.round-progress {
+  position: absolute;
+  z-index: 800;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 18px rgba(29, 45, 36, 0.1);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.text-button {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--accent-dark);
+  background: transparent;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+footer {
+  padding: 14px 4px 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+footer p {
+  margin: 0;
+}
+
+.leaflet-control-layers,
+.leaflet-control-zoom {
+  border: 0 !important;
+  box-shadow: 0 6px 22px rgba(29, 45, 36, 0.16) !important;
+}
+
+.leaflet-control-layers-expanded {
+  border-radius: 12px;
+}
+
+.municipality-shape {
+  filter: drop-shadow(0 7px 8px rgba(88, 20, 10, 0.2));
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    width: min(100% - 20px, 1180px);
+    padding-top: 20px;
   }
 
-  #mapid {
-    top: 5%;
-    height: 80%;
-    /* width: 47vw; */
-    z-index: 299;
-    opacity: 1;
-    margin: auto;
+  .app-header {
+    margin-bottom: 16px;
   }
 
-  .info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-  }
-  .info h4 {
-      margin: 0 0 5px;
-      color: #777;
+  .game-panel {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    min-height: 188px;
+    padding: 20px;
+    border-radius: 20px 20px 0 0;
   }
 
-  .zoom_feature_all_btn {
-    position: absolute;
-    width: 30px;
-    height: 20px;
-    border: solid 1px;
-    background-color: #9e9a9a;
-    border-radius: 4px;
-    padding: 2px;
-    font-size: 12px;
-    color: #3c3d3e;
-    font-weight: bold;
-    box-shadow: 2;
-    z-index: 303;
-    text-align: center;
-    cursor: pointer;
-    top: 140px;
-    left: 1%;
-    border: none;
-    user-select: none;
+  .controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  #count_down {
-    position: absolute;
-    font-size: 200px;
-    /* float: left; */
-    top: 10%;
-    left: 0;
-    right: 8%;
-    margin: auto;
-    text-align: center;
-    opacity: 0.4;
-    z-index: 400;
-    pointer-events: none;
+  .prefecture-filter select,
+  .start-button {
+    width: 100%;
+    min-width: 0;
   }
 
-  #speaker_icon {
-    position: absolute;
-    top: 115px;
-    height: 50px;
-    right: 1%;
-    cursor: pointer;
-    z-index: 300;
+  .map-panel {
+    border-radius: 0 0 20px 20px;
   }
 
-  .roulette_container {
-    right: 1%;
-    top: 220px;
-    /* margin-top: 100px; */
-    font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
-    font-weight: bold;
-    position: absolute;
-    font-size: 32px;
-    z-index: 302;
-    user-select: none;
-  }
-  #answer {
-    right: 1%;
-    top: 280px;
-    /* margin-top: 100px; */
-    font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
-    font-weight: bold;
-    position: absolute;
-    color: red;
-    font-size: 30px;
-    z-index: 302;
-    user-select: none;
-    background-color: white;
-    opacity: 0.8;
+  #map {
+    height: 58vh;
+    min-height: 390px;
   }
 
-  .select {
-    fill: rgb(255, 0, 0);
-    opacity: 1;
-  }
-
-  .btn
-  {
-    position: absolute;
-    top: 120px;
-    right: 1%;
-    width: 50px;
-    margin-top: 50px;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 0.6rem 1rem;
-    cursor: pointer;
-    text-align: center;
-    letter-spacing: 0.1em;
-    color: #212529;
-    z-index: 301;
-    user-select: none;
-  }
-
-  a.btn-border {
-    /* border: 1px solid #000; */
-    border-radius: 4px;
-    background: rgb(161, 161, 161);
-  }
-
-  /* a.btn-border:hover {
-    color: #fff;
-    background: #000;
-  } */
-
-  .disabled{
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
-  .leaflet-layer element.style{ 
-    opacity: 0.1;
-  } 
-
-  .terms_of_service{
-    position: absolute;
-    left: 27%;
-    font-size: 4pt;
-    top: 85%;
+  .round-progress {
+    right: 10px;
+    bottom: 10px;
   }
 }
 
-@media screen and (min-width: 796px) { /*ウィンドウ幅が769px以上の場合に適用*/
-  body {
-    padding: 0;
-    margin: 0;
-  }
-  html, body {
-    height: 100%;
-    width: 100vw;
-
-  }
-
-  #mapid {
-    top: 5%;
-    height: 80%;
-    width: 47vw;
-    z-index: 299;
-    opacity: 1;
-    margin: auto;
-
-  }
-
-  .info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-  }
-  .info h4 {
-      margin: 0 0 5px;
-      color: #777;
-  }
-
-  .zoom_feature_all_btn {
-    position: absolute;
-    width: 30px;
-    height: 20px;
-    border: solid 1px;
-    background-color: #9e9a9a;
-    border-radius: 4px;
-    padding: 2px;
-    font-size: 12px;
-    color: #3c3d3e;
-    font-weight: bold;
-    box-shadow: 2;
-    z-index: 303;
-    text-align: center;
-    cursor: pointer;
-    top: 120px;
-    left: 27%;
-    border: none;
-    user-select: none;
-  }
-
-  #count_down {
-    position: absolute;
-    font-size: 200px;
-    /* float: left; */
-    top: 10%;
-    left: 0;
-    right: 8%;
-    margin: auto;
-    text-align: center;
-    opacity: 0.4;
-    z-index: 400;
-    pointer-events: none;
-  }
-
-  #speaker_icon {
-    position: absolute;
-    top: 115px;
-    height: 50px;
-    right: 28%;
-    cursor: pointer;
-    z-index: 300;
-  }
-
-  .roulette_container {
-    right: 28%;
-    top: 220px;
-    /* margin-top: 100px; */
-    font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
-    font-weight: bold;
-    position: absolute;
-    font-size: 32px;
-    z-index: 302;
-    user-select: none;
-  }
-  #answer {
-    right: 28%;
-    top: 280px;
-    /* margin-top: 100px; */
-    font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
-    font-weight: bold;
-    position: absolute;
-    color: red;
-    font-size: 30px;
-    z-index: 302;
-    user-select: none;
-    background-color: white;
-    opacity: 0.8;
-  }
-
-  .select {
-    fill: rgb(255, 0, 0);
-    opacity: 1;
-  }
-
-  .btn
-  {
-    position: absolute;
-    /* top: 170px; */
-    right: 28%;
-    width: 48px;
-    /* margin-top: 50px; */
-    font-size: 14px;
-    font-weight: 700;
-    padding: 0.6rem 1rem;
-    cursor: pointer;
-    text-align: center;
-    letter-spacing: 0.1em;
-    color: #212529;
-    z-index: 301;
-    user-select: none;
-  }
-
-  a.btn-border {
-    /* border: 1px solid #000; */
-    border-radius: 4px;
-    background: rgb(161, 161, 161);
-  }
-
-  /* a.btn-border:hover {
-    color: #fff;
-    background: #000;
-  } */
-
-  .disabled{
-    pointer-events: none;
-  }
-
-  .leaflet-layer element.style{ 
-    opacity: 0.1;
-  } 
-
-  .terms_of_service{
-    position: absolute;
-    left: 27%;
-    font-size: 4pt;
-    top: 85%;
-  }
-}
-
-@media screen and (max-width: 399px) { /*ウィンドウ幅が400px以下の場合に適用*/
-  body {
-    padding: 0;
-    margin: 0;
-  }
-  html, body {
-    height: 100%;
-    width: 100vw;
-
-  }
-
-  #mapid {
-    /* top: 5%; */
-    height: 90%;
-    /* width: 47vw; */
-    z-index: 299;
-    opacity: 1;
-    margin: auto;
-
-  }
-
-  .info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-  }
-  .info h4 {
-      margin: 0 0 5px;
-      color: #777;
-  }
-
-  .zoom_feature_all_btn {
-    position: absolute;
-    width: 30px;
-    height: 20px;
-    border: solid 1px;
-    background-color: #9e9a9a;
-    border-radius: 4px;
-    padding: 4px 4px;
-    font-size: 12px;
-    color: #3c3d3e;
-    font-weight: bold;
-    box-shadow: 2;
-    z-index: 303;
-    text-align: center;
-    cursor: pointer;
-    top: 90px;
-    left: 2.5%;
-    border: none;
-    user-select: none;
-  }
-
-  #count_down {
-    position: absolute;
-    font-size: 150px;
-    /* float: left; */
-    top: 10%;
-    left: 0;
-    right: 8%;
-    margin: auto;
-    text-align: center;
-    opacity: 0.4;
-    z-index: 400;
-    pointer-events: none;
-  }
-
-  #speaker_icon {
-    position: absolute;
-    top: 15%;
-    height: 40px;
-    right: 2%;
-    cursor: pointer;
-    z-index: 300;
-  }
-
-  .roulette_container {
-    right: 2%;
-    top: 60%;
-    /* margin-top: 100px; */
-    font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
-    font-weight: bold;
-    position: absolute;
-    font-size: 24px;
-    z-index: 302;
-    user-select: none;
-  }
-  #answer {
-    right: 2%;
-    top: 68%;
-    /* margin-top: 100px; */
-    font-family: "游明朝", YuMincho,"メイリオ",Meiryo,serif,sans-serif;
-    font-weight: bold;
-    position: absolute;
-    color: red;
-    font-size: 30px;
-    z-index: 302;
-    user-select: none;
-    background-color: white;
-    opacity: 0.8;
-  }
-
-  .select {
-    fill: rgb(255, 0, 0);
-    opacity: 1;
-  }
-
-  .btn
-  {
-    position: absolute;
-    top: 55%;
-    right: 2%;
-    width: 35px;
-    /* margin-top: 50px; */
-    font-size: 10px;
-    font-weight: 700;
-    padding: 8px 8px;
-    cursor: pointer;
-    text-align: center;
-    letter-spacing: 0.1em;
-    color: #212529;
-    z-index: 301;
-    user-select: none;
-  }
-
-  a.btn-border {
-    /* border: 1px solid #000; */
-    border-radius: 4px;
-    background: rgb(161, 161, 161);
-  }
-
-  /* a.btn-border:hover {
-    color: #fff;
-    background: #000;
-  } */
-  .disabled{
-    pointer-events: none;
-  }
-
-  .leaflet-layer element.style{ 
-    opacity: 0.1;
-  } 
-
-  .terms_of_service{
-    position: absolute;
-    /* left: 27%; */
-    font-size: 4pt;
-    top: 90%;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

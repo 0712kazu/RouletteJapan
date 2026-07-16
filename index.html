@@ -1,37 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="robots" content="noindex" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Roulette japan</title>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f2ea">
+    <meta name="description" content="市区町村の形から名前を当てる、地図ルーレットゲーム">
+    <title>市区町村ルーレット</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-  crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-  crossorigin=""></script>
-  <!-- plugin -->
-  <link rel="stylesheet" href="css/L.Control.ZoomLabel.css" />
-  <script src="js/L.Control.ZoomLabel.js"></script>
-  <!-- plugin -->
-  <link rel="stylesheet" media="screen" href="css/styles.css">
-  
-</head>
-<body>
-  <img id="speaker_icon" src='img/icon_120980_256.png'>
-  <div id="count_down"></div>
-  <a class="btn btn-border" id="btn_id">PUSH</a>
-  <!-- ボタンタグ -->
-  <!-- <button type="button" class="btn btn-border" id="btn_id">PUSH</button> -->
-  <div class="roulette_container" id="roulette"></div>
-  <div id="answer"></div>
-  <div class="zoom_feature_all_btn" id="zoomstyle">全体</div>
-  <div id="mapid"></div>
-  <p class="terms_of_service">ポリゴンデータ：「国土数値情報（行政区域データ）」（国土交通省）（https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_0.html）を加工して作成</p>
-  <script src="prefectures.js"></script>
-  <script src="js/roulette.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    >
+    <link rel="stylesheet" href="css/styles.css">
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">MAP QUIZ</p>
+          <h1>市区町村ルーレット</h1>
+          <p class="lead">赤く光るまちの名前を、5秒以内に当てよう。</p>
+        </div>
+        <button id="sound-button" class="icon-button" type="button" aria-pressed="false" aria-label="音をオンにする">
+          <span aria-hidden="true">🔇</span>
+        </button>
+      </header>
 
-</body>
+      <section class="game-panel" aria-labelledby="game-heading">
+        <div class="game-copy">
+          <p id="game-heading" class="status-label">READY</p>
+          <div id="roulette" class="roulette" aria-live="polite">準備ができました</div>
+          <div id="answer" class="answer" aria-live="assertive"></div>
+        </div>
+
+        <div class="controls">
+          <label class="prefecture-filter" for="prefecture-select">
+            <span>出題範囲</span>
+            <select id="prefecture-select">
+              <option value="all">全国</option>
+            </select>
+          </label>
+          <button id="start-button" class="start-button" type="button">スタート</button>
+        </div>
+      </section>
+
+      <section class="map-panel" aria-label="出題される市区町村の地図">
+        <div id="map" role="application" aria-label="日本の市区町村地図"></div>
+        <div id="countdown" class="countdown" aria-live="off" aria-hidden="true"></div>
+        <button id="reset-map-button" class="map-reset" type="button">日本全体</button>
+        <div class="round-progress" aria-label="出題履歴">
+          <span id="progress-text">0問出題</span>
+          <button id="reset-history-button" class="text-button" type="button">履歴をリセット</button>
+        </div>
+      </section>
+
+      <footer>
+        <p>
+          境界データ：国土交通省「国土数値情報（行政区域データ）」を加工して作成。
+          データは表示用に簡略化しています。
+        </p>
+      </footer>
+    </main>
+
+    <script src="js/roulette.js"></script>
+  </body>
 </html>

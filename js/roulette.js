@@ -200,7 +200,7 @@ function showMunicipality(feature) {
   }).addTo(map);
 
   const bounds = state.layer.getBounds();
-  if (bounds.isValid()) map.fitBounds(bounds.pad(0.18), { animate: true, maxZoom: 9 });
+  if (bounds.isValid()) map.fitBounds(bounds.pad(0.18), { animate: false, maxZoom: 9 });
 }
 
 function hideMunicipality() {

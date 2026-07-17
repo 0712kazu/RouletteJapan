@@ -3,10 +3,12 @@
 const JAPAN_BOUNDS = L.latLngBounds([20.2, 122.8], [46.2, 154.1]);
 const ROULETTE_DURATION_MS = 1800;
 const ROULETTE_TICK_MS = 75;
-const ANSWER_DURATION_MS = 5000;
+const AUTO_NEXT_DELAY_MS = 2000;
 
 const elements = {
   answer: document.querySelector("#answer"),
+  autoButton: document.querySelector("#auto-button"),
+  autoState: document.querySelector("#auto-button .auto-state"),
   countdown: document.querySelector("#countdown"),
   prefectureSelect: document.querySelector("#prefecture-select"),
   progressText: document.querySelector("#progress-text"),
@@ -16,6 +18,7 @@ const elements = {
   soundButton: document.querySelector("#sound-button"),
   startButton: document.querySelector("#start-button"),
   statusLabel: document.querySelector("#game-heading"),
+  timeSelect: document.querySelector("#time-select"),
 };
 
 const map = L.map("map", {
@@ -54,6 +57,9 @@ const state = {
   dataCache: new Map(),
   layer: null,
   running: false,
+  autoEnabled: false,
+  autoTimer: null,
+  autoStopVersion: 0,
   soundEnabled: false,
   timers: new Set(),
 };
@@ -70,6 +76,14 @@ function setTimer(callback, delay) {
 function clearTimers() {
   for (const timer of state.timers) window.clearTimeout(timer);
   state.timers.clear();
+  state.autoTimer = null;
+}
+
+function scheduleAutoRound(stopVersion) {
+  state.autoTimer = setTimer(() => {
+    state.autoTimer = null;
+    if (state.autoEnabled && state.autoStopVersion === stopVersion) startRound();
+  }, AUTO_NEXT_DELAY_MS);
 }
 
 async function safePlay(audio, { restart = true } = {}) {
@@ -111,12 +125,39 @@ function setRunning(running) {
   state.running = running;
   elements.startButton.disabled = running;
   elements.prefectureSelect.disabled = running;
+  elements.resetMapButton.disabled = running;
+  elements.timeSelect.disabled = running;
   elements.startButton.textContent = running ? "出題中…" : "スタート";
+}
+
+function setMapZoomEnabled(enabled) {
+  const method = enabled ? "enable" : "disable";
+  map.scrollWheelZoom[method]();
+  map.doubleClickZoom[method]();
+  map.touchZoom[method]();
+
+  if (enabled && !map.zoomControl._map) {
+    map.zoomControl.addTo(map);
+  } else if (!enabled && map.zoomControl._map) {
+    map.zoomControl.remove();
+  }
 }
 
 function setStatus(label, mainText, answerText = "") {
   elements.statusLabel.textContent = label;
   elements.roulette.textContent = mainText;
+  elements.answer.textContent = answerText;
+}
+
+function setMunicipalityStatus(label, prefecture, municipality, answerText = "") {
+  const prefectureText = document.createElement("span");
+  prefectureText.textContent = `${prefecture} `;
+  const municipalityText = document.createElement("span");
+  if (label === "ANSWER") municipalityText.className = "municipality-name";
+  municipalityText.textContent = municipality;
+
+  elements.statusLabel.textContent = label;
+  elements.roulette.replaceChildren(prefectureText, municipalityText);
   elements.answer.textContent = answerText;
 }
 
@@ -167,11 +208,11 @@ function hideMunicipality() {
   state.layer = null;
 }
 
-function startCountdown(onComplete) {
+function startCountdown(durationMs, onComplete) {
   const startedAt = Date.now();
 
   const render = () => {
-    const remainingMs = Math.max(0, ANSWER_DURATION_MS - (Date.now() - startedAt));
+    const remainingMs = Math.max(0, durationMs - (Date.now() - startedAt));
     const remainingSeconds = Math.ceil(remainingMs / 1000);
     elements.countdown.textContent = remainingSeconds > 0 ? String(remainingSeconds) : "";
     elements.countdown.setAttribute("aria-hidden", remainingSeconds > 0 ? "false" : "true");
@@ -193,6 +234,7 @@ async function startRound() {
   pauseAllSounds();
   hideMunicipality();
   setRunning(true);
+  setMapZoomEnabled(false);
   setStatus("ROULETTE", "選んでいます…");
 
   const candidates = availableMunicipalities();
@@ -203,7 +245,7 @@ async function startRound() {
   const roulettePool = municipalitiesInScope();
   const rouletteTimer = window.setInterval(() => {
     const sample = pickRandom(roulettePool);
-    elements.roulette.textContent = `${sample.prefecture} ${sample.name}`;
+    setMunicipalityStatus("ROULETTE", sample.prefecture, sample.name);
   }, ROULETTE_TICK_MS);
   safePlay(sounds.roulette);
 
@@ -221,14 +263,20 @@ async function startRound() {
     showMunicipality(feature);
     safePlay(sounds.thinking);
 
-    startCountdown(() => {
+    const answerDurationMs = Number(elements.timeSelect.value) * 1000;
+    startCountdown(answerDurationMs, () => {
       sounds.thinking.pause();
       elements.countdown.textContent = "";
       elements.countdown.setAttribute("aria-hidden", "true");
-      setStatus("ANSWER", `${answer.prefecture} ${answer.name}`, `自治体コード ${answer.code}`);
+      setMunicipalityStatus("ANSWER", answer.prefecture, answer.name, `自治体コード ${answer.code}`);
       setRunning(false);
+      setMapZoomEnabled(true);
       safePlay(sounds.intro, { restart: false });
-      elements.startButton.focus();
+      if (state.autoEnabled) {
+        scheduleAutoRound(state.autoStopVersion);
+      } else {
+        elements.startButton.focus();
+      }
     });
   } catch (error) {
     window.clearInterval(rouletteTimer);
@@ -236,6 +284,7 @@ async function startRound() {
     updateProgress();
     setStatus("ERROR", "読み込みに失敗しました", error.message);
     setRunning(false);
+    setMapZoomEnabled(true);
   }
 }
 
@@ -259,12 +308,31 @@ async function initialize() {
     populatePrefectureSelect(state.index.prefectures);
     setStatus("READY", `${state.index.municipalities.length.toLocaleString("ja-JP")}市区町村から出題`, "出題範囲を選べます");
     elements.startButton.disabled = false;
+    window.requestAnimationFrame(() => {
+      map.invalidateSize();
+      map.fitBounds(JAPAN_BOUNDS);
+    });
   } catch (error) {
     setStatus("ERROR", "ゲームを準備できませんでした", error.message);
   }
 }
 
 elements.startButton.addEventListener("click", startRound);
+
+elements.autoButton.addEventListener("click", () => {
+  state.autoEnabled = !state.autoEnabled;
+  elements.autoButton.setAttribute("aria-pressed", String(state.autoEnabled));
+  elements.autoState.textContent = state.autoEnabled ? "ON" : "OFF";
+
+  if (!state.autoEnabled) {
+    state.autoStopVersion += 1;
+    if (state.autoTimer) {
+      window.clearTimeout(state.autoTimer);
+      state.timers.delete(state.autoTimer);
+      state.autoTimer = null;
+    }
+  }
+});
 
 elements.resetMapButton.addEventListener("click", () => {
   map.fitBounds(JAPAN_BOUNDS);
@@ -276,7 +344,8 @@ elements.resetHistoryButton.addEventListener("click", () => {
   elements.resetHistoryButton.blur();
 });
 
-elements.soundButton.addEventListener("click", async () => {
+// Music機能を復元する場合は、index.htmlのボタンのコメントも外してください。
+elements.soundButton?.addEventListener("click", async () => {
   state.soundEnabled = !state.soundEnabled;
   elements.soundButton.setAttribute("aria-pressed", String(state.soundEnabled));
   elements.soundButton.setAttribute("aria-label", state.soundEnabled ? "音をオフにする" : "音をオンにする");

@@ -7,6 +7,12 @@
     <meta name="description" content="市区町村の形から名前を当てる、地図ルーレットゲーム">
     <title>市区町村ルーレット</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap"
+    >
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -23,14 +29,16 @@
   <body>
     <main class="app-shell">
       <header class="app-header">
-        <div>
+        <div class="title-block">
           <p class="eyebrow">MAP QUIZ</p>
-          <h1>市区町村ルーレット</h1>
-          <p class="lead">赤く光るまちの名前を、5秒以内に当てよう。</p>
+          <h1><span class="title-accent">市区町村</span><span>ルーレット</span></h1>
+          <p class="lead">赤く光るまちの名前を、制限時間内に当てよう。</p>
         </div>
+        <!-- Music機能を復元する場合は、このコメントを外してください。
         <button id="sound-button" class="icon-button" type="button" aria-pressed="false" aria-label="音をオンにする">
           <span aria-hidden="true">🔇</span>
         </button>
+        -->
       </header>
 
       <section class="game-panel" aria-labelledby="game-heading">
@@ -47,13 +55,26 @@
               <option value="all">全国</option>
             </select>
           </label>
+          <label class="time-filter" for="time-select">
+            <span>制限時間</span>
+            <select id="time-select">
+              <option value="5" selected>5秒</option>
+              <option value="10">10秒</option>
+              <option value="20">20秒</option>
+            </select>
+          </label>
+          <button id="auto-button" class="auto-button" type="button" aria-pressed="false">
+            <span>AUTO</span>
+            <span class="auto-state">OFF</span>
+          </button>
           <button id="start-button" class="start-button" type="button">スタート</button>
         </div>
+
+        <div id="countdown" class="countdown" aria-live="off" aria-hidden="true"></div>
       </section>
 
       <section class="map-panel" aria-label="出題される市区町村の地図">
         <div id="map" role="application" aria-label="日本の市区町村地図"></div>
-        <div id="countdown" class="countdown" aria-live="off" aria-hidden="true"></div>
         <button id="reset-map-button" class="map-reset" type="button">日本全体</button>
         <div class="round-progress" aria-label="出題履歴">
           <span id="progress-text">0問出題</span>

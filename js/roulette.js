@@ -3,7 +3,8 @@
 const JAPAN_BOUNDS = L.latLngBounds([20.2, 122.8], [46.2, 154.1]);
 const ROULETTE_DURATION_MS = 1800;
 const ROULETTE_TICK_MS = 75;
-const AUTO_NEXT_DELAY_MS = 2000;
+const AUTO_NEXT_DELAY_MS = 5000;
+const COUNTDOWN_START_DELAY_MS = 500;
 
 const elements = {
   answer: document.querySelector("#answer"),
@@ -264,20 +265,22 @@ async function startRound() {
     safePlay(sounds.thinking);
 
     const answerDurationMs = Number(elements.timeSelect.value) * 1000;
-    startCountdown(answerDurationMs, () => {
-      sounds.thinking.pause();
-      elements.countdown.textContent = "";
-      elements.countdown.setAttribute("aria-hidden", "true");
-      setMunicipalityStatus("ANSWER", answer.prefecture, answer.name, `自治体コード ${answer.code}`);
-      setRunning(false);
-      setMapZoomEnabled(true);
-      safePlay(sounds.intro, { restart: false });
-      if (state.autoEnabled) {
-        scheduleAutoRound(state.autoStopVersion);
-      } else {
-        elements.startButton.focus();
-      }
-    });
+    setTimer(() => {
+      startCountdown(answerDurationMs, () => {
+        sounds.thinking.pause();
+        elements.countdown.textContent = "";
+        elements.countdown.setAttribute("aria-hidden", "true");
+        setMunicipalityStatus("ANSWER", answer.prefecture, answer.name, `自治体コード ${answer.code}`);
+        setRunning(false);
+        setMapZoomEnabled(true);
+        safePlay(sounds.intro, { restart: false });
+        if (state.autoEnabled) {
+          scheduleAutoRound(state.autoStopVersion);
+        } else {
+          elements.startButton.focus();
+        }
+      });
+    }, COUNTDOWN_START_DELAY_MS);
   } catch (error) {
     window.clearInterval(rouletteTimer);
     state.usedCodes.delete(answer.code);

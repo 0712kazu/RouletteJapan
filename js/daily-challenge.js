@@ -30,6 +30,7 @@ const elements = {
   questionIntroText: document.querySelector("#question-intro-text"),
   questionIntroView: document.querySelector("#question-intro-view"),
   questionProgress: document.querySelector("#question-progress"),
+  questionSteps: document.querySelector("#question-steps"),
   quizView: document.querySelector("#quiz-view"),
   rankingForm: document.querySelector("#ranking-form"),
   rankingList: document.querySelector("#ranking-list"),
@@ -41,19 +42,29 @@ const elements = {
   shareText: document.querySelector("#share-text"),
   startButton: document.querySelector("#daily-start-button"),
   xShareLink: document.querySelector("#x-share-link"),
+  zoomOutButton: document.querySelector("#zoom-out-button"),
 };
 
 const map = L.map("daily-map", {
   minZoom: 3,
   maxZoom: 11,
+  zoomSnap: 0.5,
+  zoomDelta: 0.5,
   zoomControl: false,
   dragging: false,
+  boxZoom: false,
   scrollWheelZoom: false,
   doubleClickZoom: false,
   touchZoom: false,
   keyboard: false,
   attributionControl: true,
 }).fitBounds(JAPAN_BOUNDS);
+
+function updateZoomOutButton() {
+  elements.zoomOutButton.disabled = map.getZoom() <= map.getMinZoom();
+}
+
+map.on("zoomend", updateZoomOutButton);
 
 L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", {
   attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>',
@@ -138,12 +149,18 @@ function showFeature(feature) {
   }).addTo(map);
   const bounds = state.layer.getBounds();
   if (bounds.isValid()) map.fitBounds(bounds.pad(0.18), { animate: false, maxZoom: 9 });
+  updateZoomOutButton();
 }
 
 async function showQuestion() {
   const question = state.questions[state.currentIndex];
-  elements.questionProgress.textContent = `QUESTION ${state.currentIndex + 1} / ${QUESTION_COUNT}`;
-  elements.populationBadge.textContent = `人口 ${state.bands.get(question.populationBand)}`;
+  elements.questionProgress.textContent = `第${state.currentIndex + 1}問`;
+  elements.populationBadge.textContent = `凡例｜人口区分：${state.bands.get(question.populationBand)}`;
+  elements.questionSteps.setAttribute("aria-label", `全${QUESTION_COUNT}問中${state.currentIndex + 1}問目`);
+  [...elements.questionSteps.children].forEach((step, index) => {
+    step.classList.toggle("is-current", index === state.currentIndex);
+    step.classList.toggle("is-complete", index < state.currentIndex);
+  });
   elements.answerInput.value = "";
   elements.answerInput.disabled = true;
   elements.answerButton.disabled = true;
@@ -311,6 +328,7 @@ elements.answerForm.addEventListener("submit", submitAnswer);
 elements.nextButton.addEventListener("click", goNext);
 elements.copyButton.addEventListener("click", copyShareText);
 elements.rankingForm.addEventListener("submit", submitRanking);
+elements.zoomOutButton.addEventListener("click", () => map.zoomOut());
 
 loadChallenge().catch((error) => {
   elements.dailyDate.textContent = "読み込みエラー";

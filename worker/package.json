@@ -1,0 +1,12 @@
+{
+  "name": "roulette-japan-daily-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "generate:seed": "node scripts/generate-seed.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.28.1"
+  }
+}

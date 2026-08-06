@@ -36,6 +36,27 @@ select {
   font: inherit;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.daily-link {
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: white;
+  background: var(--green);
+  box-shadow: 0 8px 24px rgba(36, 79, 59, 0.18);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.daily-link:hover {
+  background: #173c2b;
+}
+
 button,
 select,
 .leaflet-control a {

@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "roulette-japan-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "roulette-japan",
+      "database_id": "b891e47a-6842-4b00-a48e-9e599e8e6dcf"
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://0712kazu.github.io"
+  }
+}

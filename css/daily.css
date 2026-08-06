@@ -1,0 +1,638 @@
+:root {
+  --atlas-paper: #f2ead4;
+  --atlas-paper-deep: #e4d7b7;
+  --atlas-ink: #152c3c;
+  --atlas-red: #a9362a;
+  --atlas-green: #405a43;
+  --atlas-rule: rgba(21, 44, 60, 0.16);
+}
+
+body {
+  color: var(--atlas-ink);
+  background:
+    linear-gradient(90deg, transparent 31px, rgba(169, 54, 42, 0.16) 32px, transparent 33px),
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(21, 44, 60, 0.055) 28px),
+    var(--atlas-paper);
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", serif;
+}
+
+.daily-shell {
+  width: min(980px, calc(100% - 28px));
+  max-width: 980px;
+  padding-top: 16px;
+}
+
+.daily-shell .app-header {
+  position: relative;
+  align-items: center;
+  margin: 0;
+  padding: 22px 26px 18px 46px;
+  border: 3px double var(--atlas-ink);
+  border-bottom: 2px solid var(--atlas-ink);
+  background: rgba(242, 234, 212, 0.96);
+  box-shadow: 7px 8px 0 var(--atlas-paper-deep);
+}
+
+.daily-shell .eyebrow,
+.daily-shell .lead,
+.service-note,
+.population-badge,
+.question-steps,
+.answer-form label,
+.ranking-form label,
+.share-panel label,
+.map-zoom-out,
+.daily-shell footer {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+.daily-shell .eyebrow {
+  color: var(--atlas-red);
+  letter-spacing: 0.16em;
+}
+
+.daily-shell h1 {
+  display: block;
+  color: var(--atlas-ink);
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.daily-shell .title-accent {
+  color: var(--atlas-ink);
+}
+
+.daily-shell .lead {
+  color: rgba(21, 44, 60, 0.76);
+  letter-spacing: 0.04em;
+}
+
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.daily-stamp {
+  display: grid;
+  width: 70px;
+  min-height: 70px;
+  place-items: center;
+  border: 3px double var(--atlas-red);
+  color: var(--atlas-red);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  transform: rotate(-3deg);
+}
+
+.back-link {
+  padding: 9px 12px;
+  border: 1px solid var(--atlas-ink);
+  border-radius: 0;
+  color: var(--atlas-ink);
+  background: var(--atlas-paper-deep);
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--atlas-paper);
+  background: var(--atlas-ink);
+}
+
+.daily-card,
+.daily-quiz {
+  padding: clamp(22px, 5vw, 46px);
+  border: 3px double var(--atlas-ink);
+  border-top: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, transparent 30px, rgba(169, 54, 42, 0.16) 31px, transparent 32px),
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(21, 44, 60, 0.055) 28px),
+    var(--atlas-paper);
+  box-shadow: 7px 8px 0 var(--atlas-paper-deep);
+}
+
+.intro-card {
+  max-width: none;
+  min-height: 460px;
+  margin: 0;
+  text-align: center;
+}
+
+.intro-card > p:not(.daily-date):not(.service-note) {
+  margin-top: 24px;
+  font-size: 1.05rem;
+}
+
+.question-intro-card {
+  display: grid;
+  min-height: min(60vh, 540px);
+  margin-top: 0;
+  place-items: center;
+  text-align: center;
+}
+
+.question-intro-text {
+  margin: 0;
+  padding: 18px 28px;
+  border: 4px double var(--atlas-red);
+  color: var(--atlas-red);
+  font-size: clamp(2.5rem, 10vw, 5.8rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transform: rotate(-2deg);
+}
+
+.daily-date {
+  display: inline-block;
+  margin: 4px 0 10px;
+  padding: 0 0 5px;
+  border-bottom: 2px solid var(--atlas-red);
+  border-radius: 0;
+  color: var(--atlas-red);
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.daily-card h2,
+.daily-quiz h2 {
+  margin: 4px 0 0;
+  color: var(--atlas-ink);
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.daily-rules {
+  display: inline-grid;
+  gap: 7px;
+  margin: 20px auto 24px;
+  padding: 16px 22px 16px 42px;
+  border: 1px solid var(--atlas-ink);
+  color: var(--atlas-ink);
+  background: rgba(242, 234, 212, 0.82);
+  line-height: 1.7;
+  text-align: left;
+}
+
+.service-note {
+  min-height: 1.4em;
+  color: rgba(21, 44, 60, 0.72);
+  font-size: 0.76rem;
+}
+
+.daily-status-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+  padding-bottom: 9px;
+  border-bottom: 3px double var(--atlas-ink);
+}
+
+.population-badge {
+  padding: 0;
+  border-radius: 0;
+  color: var(--atlas-green);
+  background: transparent;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.question-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 30px);
+  justify-content: end;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.question-steps span {
+  display: grid;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--atlas-ink);
+  background: var(--atlas-paper);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.question-steps .is-current {
+  border-color: var(--atlas-red);
+  color: var(--atlas-paper);
+  background: var(--atlas-red);
+}
+
+.question-steps .is-complete {
+  color: var(--atlas-paper);
+  background: var(--atlas-green);
+}
+
+.daily-map-panel {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--atlas-ink);
+  border-radius: 0;
+  background: #fff;
+}
+
+#daily-map {
+  width: 100%;
+  height: min(54vh, 520px);
+  min-height: 360px;
+  background: #fff;
+}
+
+.map-zoom-out {
+  position: absolute;
+  z-index: 900;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  min-width: 48px;
+  min-height: 48px;
+  place-items: center;
+  padding: 4px 8px;
+  border: 2px solid var(--atlas-ink);
+  border-radius: 0;
+  color: var(--atlas-ink);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.map-zoom-out span:first-child {
+  font-size: 1.5rem;
+}
+
+.map-zoom-out:hover:not(:disabled) {
+  color: #fff;
+  background: var(--atlas-ink);
+}
+
+.map-zoom-out:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.map-loading {
+  position: absolute;
+  z-index: 910;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--atlas-ink);
+  background: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+}
+
+.map-loading[hidden] {
+  display: none;
+}
+
+.daily-map-panel .leaflet-control-attribution {
+  color: var(--atlas-ink);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.answer-form,
+.ranking-form {
+  display: grid;
+  gap: 7px;
+  margin-top: 17px;
+}
+
+.answer-form label,
+.ranking-form label,
+.share-panel label {
+  width: fit-content;
+  padding: 6px 10px;
+  color: var(--atlas-paper);
+  background: var(--atlas-ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.answer-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.answer-row input,
+#share-text {
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid var(--atlas-ink);
+  border-radius: 0;
+  color: var(--atlas-ink);
+  background: rgba(255, 255, 255, 0.45);
+  font: inherit;
+}
+
+.answer-row input {
+  min-height: 46px;
+  padding: 8px 6px;
+}
+
+.answer-row input:focus-visible,
+#share-text:focus-visible,
+.daily-shell button:focus-visible,
+.daily-shell a:focus-visible {
+  outline: 3px solid rgba(169, 54, 42, 0.52);
+  outline-offset: 3px;
+}
+
+.daily-shell .start-button,
+.secondary-button {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 2px solid var(--atlas-red);
+  border-radius: 0;
+  color: var(--atlas-paper);
+  background: var(--atlas-red);
+  box-shadow: none;
+  cursor: pointer;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.daily-shell .start-button:hover:not(:disabled),
+.secondary-button:hover:not(:disabled) {
+  color: var(--atlas-red);
+  background: var(--atlas-paper);
+  transform: none;
+}
+
+.daily-shell .start-button:disabled,
+.secondary-button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.feedback {
+  margin-top: 16px;
+  padding: 16px;
+  border: 3px double var(--atlas-ink);
+  border-radius: 0;
+  background: rgba(242, 234, 212, 0.9);
+}
+
+.feedback-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.feedback p:nth-child(2) {
+  margin: 5px 0 13px;
+  color: rgba(21, 44, 60, 0.76);
+}
+
+.feedback.is-correct .feedback-title {
+  color: var(--atlas-green);
+}
+
+.feedback.is-wrong .feedback-title {
+  color: var(--atlas-red);
+}
+
+.result-card {
+  margin-top: 0;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 20px 0;
+  border: 2px solid var(--atlas-ink);
+}
+
+.score-grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 18px;
+  border-radius: 0;
+  background: rgba(242, 234, 212, 0.8);
+  text-align: center;
+}
+
+.score-grid > div + div {
+  border-left: 1px solid var(--atlas-ink);
+}
+
+.score-grid strong {
+  color: var(--atlas-red);
+  font-size: clamp(1.45rem, 5vw, 2.2rem);
+}
+
+.score-grid span {
+  color: var(--atlas-ink);
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.result-list,
+.ranking-list {
+  display: grid;
+  gap: 0;
+  padding-left: 2rem;
+}
+
+.result-list li,
+.ranking-list li {
+  padding: 9px 12px;
+  border: 1px solid var(--atlas-ink);
+  border-bottom: 0;
+  background: rgba(242, 234, 212, 0.74);
+}
+
+.result-list li:last-child,
+.ranking-list li:last-child {
+  border-bottom: 1px solid var(--atlas-ink);
+}
+
+.result-list .correct {
+  color: var(--atlas-green);
+}
+
+.result-list .wrong {
+  color: var(--atlas-red);
+}
+
+.share-panel,
+.ranking-panel {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 3px double var(--atlas-ink);
+}
+
+#share-text {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--atlas-ink);
+  resize: vertical;
+}
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.link-button {
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.secondary-button {
+  border-color: var(--atlas-ink);
+  color: var(--atlas-paper);
+  background: var(--atlas-ink);
+}
+
+.secondary-button:hover:not(:disabled) {
+  color: var(--atlas-ink);
+}
+
+.ranking-panel h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.ranking-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+  border: 1px solid var(--atlas-ink);
+  background: rgba(242, 234, 212, 0.76);
+}
+
+.ranking-summary:empty {
+  display: none;
+}
+
+.ranking-summary p {
+  margin: 0;
+  padding: 10px;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.ranking-summary p + p {
+  border-left: 1px solid var(--atlas-ink);
+}
+
+.result-back {
+  display: inline-block;
+  margin-top: 24px;
+}
+
+.daily-shell footer {
+  padding: 24px 12px 0;
+  color: rgba(21, 44, 60, 0.72);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .daily-shell {
+    width: min(100% - 18px, 980px);
+  }
+
+  .daily-shell .app-header {
+    align-items: flex-start;
+    padding: 17px 14px 14px 28px;
+  }
+
+  .daily-shell h1 {
+    font-size: clamp(1.35rem, 7vw, 1.8rem);
+  }
+
+  .header-tools {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .daily-stamp {
+    width: 56px;
+    min-height: 56px;
+    font-size: 0.78rem;
+  }
+
+  .back-link {
+    max-width: 86px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+
+  .daily-card,
+  .daily-quiz {
+    padding: 20px 14px 24px 28px;
+  }
+
+  .daily-status-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .population-badge {
+    white-space: normal;
+  }
+
+  .question-steps {
+    justify-content: start;
+  }
+
+  #daily-map {
+    min-height: 320px;
+  }
+
+  .answer-row {
+    grid-template-columns: 1fr;
+  }
+
+  .answer-row .start-button,
+  .answer-row .secondary-button {
+    width: 100%;
+  }
+
+  .score-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-summary p + p {
+    border-top: 1px solid var(--atlas-ink);
+    border-left: 0;
+  }
+
+  .score-grid > div + div {
+    border-top: 1px solid var(--atlas-ink);
+    border-left: 0;
+  }
+}

@@ -58,7 +58,7 @@ for pref_code in $PREF_CODES; do
     "$processed_file" \
     "$source_file" \
     -dialect SQLite \
-    -sql "SELECT CASE WHEN MAX(N03_005) IS NOT NULL THEN SUBSTR(MIN(N03_007), 1, 4) || '0' ELSE MIN(N03_007) END AS code, MAX(N03_001) AS prefecture, MAX(N03_004) AS name, '${year}' AS sourceYear, ST_Union(geometry) AS geometry FROM '${layer_name}' WHERE N03_007 IS NOT NULL AND N03_004 IS NOT NULL AND N03_007 NOT LIKE '%000' GROUP BY CASE WHEN N03_005 IS NOT NULL THEN N03_001 || ':' || N03_004 ELSE N03_007 END" \
+    -sql "SELECT CASE WHEN MAX(N03_005) IS NOT NULL THEN SUBSTR(MIN(N03_007), 1, 4) || '0' ELSE MIN(N03_007) END AS code, MAX(N03_001) AS prefecture, CASE WHEN MAX(N03_005) IS NOT NULL THEN NULL ELSE MAX(N03_003) END AS district, MAX(N03_004) AS name, '${year}' AS sourceYear, ST_Union(geometry) AS geometry FROM '${layer_name}' WHERE N03_007 IS NOT NULL AND N03_004 IS NOT NULL AND N03_007 NOT LIKE '%000' GROUP BY CASE WHEN N03_005 IS NOT NULL THEN N03_001 || ':' || N03_004 ELSE N03_007 END" \
     -simplify "$SIMPLIFY_TOLERANCE" \
     -lco COORDINATE_PRECISION=5
   mv "$processed_file" "$OUTPUT_DIR/${pref_code}.geojson"
@@ -78,9 +78,9 @@ for (let prefNumber = 1; prefNumber <= 47; prefNumber += 1) {
   const geojson = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
   for (const feature of geojson.features) {
-    const { code, name, prefecture, sourceYear } = feature.properties;
+    const { code, name, prefecture, district, sourceYear } = feature.properties;
     if (!code || !name || !prefecture) continue;
-    municipalities.push({ code, name, prefCode, prefecture, sourceYear });
+    municipalities.push({ code, name, prefCode, prefecture, district: district ?? null, sourceYear });
     prefectureMap.set(prefCode, prefecture);
   }
 }

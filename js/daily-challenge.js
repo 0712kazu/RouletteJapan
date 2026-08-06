@@ -5,10 +5,11 @@ import {
   japanDateKey,
   selectDailyQuestions,
 } from "./daily-core.mjs";
+import { API_BASE_URL } from "./api-config.mjs";
 
-const API_BASE = document.querySelector('meta[name="daily-api-base"]')?.content?.replace(/\/$/, "") ?? "";
 const QUESTION_COUNT = 5;
 const QUESTION_INTRO_MS = 2000;
+const RANKING_UNAVAILABLE_MESSAGE = "ランキングは現在利用できません。クイズは通常どおり遊べます。";
 const JAPAN_BOUNDS = L.latLngBounds([20.2, 122.8], [46.2, 154.1]);
 
 const elements = {
@@ -34,6 +35,7 @@ const elements = {
   quizView: document.querySelector("#quiz-view"),
   rankingForm: document.querySelector("#ranking-form"),
   rankingList: document.querySelector("#ranking-list"),
+  rankingSummary: document.querySelector("#ranking-summary"),
   rankingStatus: document.querySelector("#ranking-status"),
   resultList: document.querySelector("#result-list"),
   resultScore: document.querySelector("#result-score"),
@@ -80,12 +82,12 @@ const state = {
   results: [],
   questionStartedAt: 0,
   layer: null,
-  source: "fallback",
-  submissionId: globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
 };
 
 function apiUrl(path) {
-  return `${API_BASE}${path}`;
+  const baseUrl = API_BASE_URL.replace(/\/$/, "");
+  if (!baseUrl) throw new Error("API URLが未設定です");
+  return `${baseUrl}${path}`;
 }
 
 async function fetchJson(url, options = {}, timeoutMs = 3500) {
@@ -106,22 +108,11 @@ function formatDateLabel(dateKey) {
 }
 
 async function loadChallenge() {
-  try {
-    const payload = await fetchJson(apiUrl("/api/daily"));
-    if (!payload.dateKey || payload.questions?.length !== QUESTION_COUNT) throw new Error("問題形式が不正です");
-    state.dateKey = payload.dateKey;
-    state.questions = payload.questions;
-    state.bands = new Map(payload.populationBands.map((band) => [band.id, band.label]));
-    state.source = "api";
-    elements.loadStatus.textContent = "今日の共通問題を読み込みました。";
-  } catch (error) {
-    console.info("デイリーAPIを利用できないため同梱問題を使います。", error.message);
-    const pool = await fetchJson("data/daily-challenge-pool.json", {}, 6000);
-    state.dateKey = japanDateKey();
-    state.questions = selectDailyQuestions(pool, state.dateKey);
-    state.bands = new Map(pool.populationBands.map((band) => [band.id, band.label]));
-    elements.loadStatus.textContent = "オフライン用の共通問題でプレイできます。ランキングは接続時のみ利用できます。";
-  }
+  const pool = await fetchJson("data/daily-challenge-pool.json", {}, 6000);
+  state.dateKey = japanDateKey();
+  state.questions = selectDailyQuestions(pool, state.dateKey);
+  state.bands = new Map(pool.populationBands.map((band) => [band.id, band.label]));
+  elements.loadStatus.textContent = "今日の共通問題を準備しました。";
 
   elements.dailyDate.textContent = formatDateLabel(state.dateKey);
   elements.startButton.disabled = false;
@@ -252,35 +243,97 @@ function showResults() {
   elements.resultTime.textContent = formatElapsed(totalTimeMs);
   renderResultList();
 
+  updateShareText({ top: loadSavedTopScore() });
+  loadRanking();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateShareText({ rank = null, top = null } = {}) {
+  const { correctCount, totalTimeMs } = scoreSummary();
   const shareText = buildShareText({
     dateKey: state.dateKey,
     correctCount,
     elapsedMs: totalTimeMs,
+    rank,
+    top,
     url: new URL("daily.html", window.location.href).href,
   });
   elements.shareText.value = shareText;
   elements.xShareLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
-  loadRanking();
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function renderRanking(entries) {
   elements.rankingList.replaceChildren(...entries.map((entry, index) => {
     const item = document.createElement("li");
-    item.textContent = `${index + 1}位 ${entry.playerName} — ${entry.correctCount}/5・${formatElapsed(entry.totalTimeMs)}`;
+    item.textContent = `${entry.rank ?? index + 1}位 ${entry.player_name} — ${entry.correct_count}/5・${formatElapsed(entry.total_time_ms)}`;
     return item;
   }));
 }
 
-async function loadRanking() {
+function rankingCacheKey() {
+  return `roulette-japan:daily-top:${state.dateKey}`;
+}
+
+function saveTopScore(top) {
+  if (!top || !Number.isInteger(top.correct_count) || !Number.isInteger(top.total_time_ms)) return;
   try {
-    const payload = await fetchJson(apiUrl(`/api/rankings?date=${encodeURIComponent(state.dateKey)}`));
+    localStorage.setItem(rankingCacheKey(), JSON.stringify({
+      correct_count: top.correct_count,
+      total_time_ms: top.total_time_ms,
+    }));
+  } catch (error) {
+    console.info("暫定トップをブラウザへ保存できませんでした。", error.name);
+  }
+}
+
+function loadSavedTopScore() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(rankingCacheKey()) ?? "null");
+    if (!saved || !Number.isInteger(saved.correct_count) || !Number.isInteger(saved.total_time_ms)) return null;
+    return saved;
+  } catch {
+    return null;
+  }
+}
+
+function renderRankingSummary({ rank = null, top = null } = {}) {
+  const { correctCount, totalTimeMs } = scoreSummary();
+  const lines = [`あなたの記録：${correctCount}/5・${formatElapsed(totalTimeMs)}`];
+  if (Number.isInteger(rank) && rank > 0) lines.push(`全国順位：${rank}位`);
+  if (top) lines.push(`本日の暫定トップ：${top.correct_count}/5・${formatElapsed(top.total_time_ms)}`);
+  elements.rankingSummary.replaceChildren(...lines.map((text) => {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+    return paragraph;
+  }));
+  updateShareText({ rank, top });
+}
+
+function showRankingUnavailable() {
+  renderRankingSummary({ top: loadSavedTopScore() });
+  elements.rankingStatus.textContent = RANKING_UNAVAILABLE_MESSAGE;
+  elements.rankingList.replaceChildren();
+}
+
+async function loadRanking(rank = null) {
+  try {
+    const payload = await fetchJson(apiUrl(`/ranking?date=${encodeURIComponent(state.dateKey)}`));
     renderRanking(payload.rankings ?? []);
-    elements.rankingStatus.textContent = payload.rankings?.length ? "正解数が多く、合計時間が短い順です。" : "今日の登録はまだありません。";
+    const top = payload.top ?? payload.rankings?.[0] ?? null;
+    saveTopScore(top);
+    renderRankingSummary({ rank, top });
+    elements.rankingStatus.textContent = payload.rankings?.length
+      ? "正解数が多く、合計時間が短い順です。"
+      : "今日の登録はまだありません。";
   } catch (error) {
     console.info("ランキングを取得できませんでした。", error.message);
-    elements.rankingStatus.textContent = "ランキングに接続できません。結果やX投稿はそのまま利用できます。";
-    elements.rankingList.replaceChildren();
+    if (Number.isInteger(rank) && rank > 0) {
+      renderRankingSummary({ rank, top: loadSavedTopScore() });
+      elements.rankingStatus.textContent = RANKING_UNAVAILABLE_MESSAGE;
+      elements.rankingList.replaceChildren();
+    } else {
+      showRankingUnavailable();
+    }
   }
 }
 
@@ -292,22 +345,23 @@ async function submitRanking(event) {
   const { correctCount, totalTimeMs } = scoreSummary();
 
   try {
-    await fetchJson(apiUrl("/api/rankings"), {
+    const payload = await fetchJson(apiUrl("/score"), {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        submissionId: state.submissionId,
-        dateKey: state.dateKey,
-        playerName: elements.playerName.value.trim() || "ゲスト",
-        correctCount,
-        totalTimeMs,
+        play_date: state.dateKey,
+        player_name: elements.playerName.value.trim() || "ゲスト",
+        correct_count: correctCount,
+        total_time_ms: totalTimeMs,
       }),
     });
+    saveTopScore(payload.top);
+    renderRankingSummary({ rank: payload.rank, top: payload.top });
     elements.rankingStatus.textContent = "結果を登録しました。";
-    await loadRanking();
+    await loadRanking(payload.rank);
   } catch (error) {
     console.info("ランキングへ登録できませんでした。", error.message);
-    elements.rankingStatus.textContent = "登録できませんでした。クイズ結果やX投稿には影響ありません。";
+    showRankingUnavailable();
   } finally {
     submitButton.disabled = false;
   }

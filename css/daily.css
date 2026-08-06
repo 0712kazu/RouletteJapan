@@ -517,6 +517,30 @@ body {
   font-size: 1.25rem;
 }
 
+.ranking-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+  border: 1px solid var(--atlas-ink);
+  background: rgba(242, 234, 212, 0.76);
+}
+
+.ranking-summary:empty {
+  display: none;
+}
+
+.ranking-summary p {
+  margin: 0;
+  padding: 10px;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.ranking-summary p + p {
+  border-left: 1px solid var(--atlas-ink);
+}
+
 .result-back {
   display: inline-block;
   margin-top: 24px;
@@ -596,6 +620,15 @@ body {
 
   .score-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ranking-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-summary p + p {
+    border-top: 1px solid var(--atlas-ink);
+    border-left: 0;
   }
 
   .score-grid > div + div {

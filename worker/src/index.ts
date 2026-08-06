@@ -23,6 +23,17 @@ const MAX_TOTAL_TIME_MS = 30 * 60 * 1000;
 const RANKING_LIMIT = 100;
 const DEFAULT_PRODUCTION_ORIGINS = ["https://0712kazu.github.io"];
 
+function assignCompetitionRanks(scores: ScoreRow[]): Array<ScoreRow & { rank: number }> {
+  let previousKey: string | null = null;
+  let rank = 0;
+  return scores.map((score, index) => {
+    const key = `${score.correct_count}:${score.total_time_ms}`;
+    if (key !== previousKey) rank = index + 1;
+    previousKey = key;
+    return { rank, ...score };
+  });
+}
+
 function allowedOrigins(env: Env): Set<string> {
   const configured = env.ALLOWED_ORIGINS
     ?.split(",")
@@ -115,7 +126,7 @@ async function handleRanking(request: Request, env: Env, url: URL): Promise<Resp
     LIMIT ?
   `).bind(playDate, RANKING_LIMIT).all<ScoreRow>();
 
-  const rankings = result.results.map((score, index) => ({ rank: index + 1, ...score }));
+  const rankings = assignCompetitionRanks(result.results);
   return json(request, env, { play_date: playDate, rankings, top: rankings[0] ?? null });
 }
 
@@ -153,22 +164,13 @@ async function handleScore(request: Request, env: Env): Promise<Response> {
     FROM daily_scores
     WHERE play_date = ? AND (
       correct_count > ? OR
-      (correct_count = ? AND total_time_ms < ?) OR
-      (correct_count = ? AND total_time_ms = ? AND created_at < ?) OR
-      (correct_count = ? AND total_time_ms = ? AND created_at = ? AND id < ?)
+      (correct_count = ? AND total_time_ms < ?)
     )
   `).bind(
     score.play_date,
     score.correct_count,
     score.correct_count,
     score.total_time_ms,
-    score.correct_count,
-    score.total_time_ms,
-    createdAt,
-    score.correct_count,
-    score.total_time_ms,
-    createdAt,
-    id,
   ).first<RankRow>();
   const top = await getTopScore(env, score.play_date);
 
@@ -200,5 +202,5 @@ const worker: ExportedHandler<Env> = {
   },
 };
 
-export { isValidDate, validateScore };
+export { assignCompetitionRanks, isValidDate, validateScore };
 export default worker;

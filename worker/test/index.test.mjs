@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import worker, { isValidDate, validateScore } from "../.build/index.js";
+import worker, { assignCompetitionRanks, isValidDate, validateScore } from "../.build/index.js";
 
 const allowedEnv = (DB) => ({ DB, ALLOWED_ORIGINS: "https://0712kazu.github.io,http://localhost:8000" });
 
@@ -40,7 +40,8 @@ test("GET /health はD1障害時に503を返す", async () => {
 test("GET /ranking は指定日の上位100件をバインドして取得する", async () => {
   const rows = [
     { id: 2, play_date: "2026-08-06", player_name: "A", correct_count: 5, total_time_ms: 10000, created_at: "2026-08-06T00:00:00.000Z" },
-    { id: 3, play_date: "2026-08-06", player_name: "B", correct_count: 4, total_time_ms: 9000, created_at: "2026-08-06T00:00:01.000Z" },
+    { id: 3, play_date: "2026-08-06", player_name: "B", correct_count: 5, total_time_ms: 10000, created_at: "2026-08-06T00:00:01.000Z" },
+    { id: 4, play_date: "2026-08-06", player_name: "C", correct_count: 4, total_time_ms: 9000, created_at: "2026-08-06T00:00:02.000Z" },
   ];
   const DB = {
     prepare(sql) {
@@ -56,7 +57,41 @@ test("GET /ranking は指定日の上位100件をバインドして取得する"
   const body = await response.json();
   assert.equal(response.headers.get("access-control-allow-origin"), "https://0712kazu.github.io");
   assert.equal(body.rankings[0].rank, 1);
+  assert.equal(body.rankings[1].rank, 1);
+  assert.equal(body.rankings[2].rank, 3);
   assert.equal(body.top.player_name, "A");
+});
+
+test("競技順位は完全同点を同順位にし、次順位を飛ばす", () => {
+  const base = { play_date: "2026-08-06" };
+  const rankings = assignCompetitionRanks([
+    { ...base, id: 1, player_name: "A", correct_count: 5, total_time_ms: 10000, created_at: "2026-08-06T00:00:00.000Z" },
+    { ...base, id: 2, player_name: "B", correct_count: 5, total_time_ms: 10000, created_at: "2026-08-06T00:00:01.000Z" },
+    { ...base, id: 3, player_name: "C", correct_count: 4, total_time_ms: 8000, created_at: "2026-08-06T00:00:02.000Z" },
+    { ...base, id: 4, player_name: "D", correct_count: 4, total_time_ms: 9000, created_at: "2026-08-06T00:00:03.000Z" },
+    { ...base, id: 5, player_name: "E", correct_count: 4, total_time_ms: 9000, created_at: "2026-08-06T00:00:04.000Z" },
+    { ...base, id: 6, player_name: "F", correct_count: 3, total_time_ms: 1000, created_at: "2026-08-06T00:00:05.000Z" },
+  ]);
+  assert.deepEqual(rankings.map((item) => item.rank), [1, 1, 3, 4, 4, 6]);
+  assert.deepEqual(rankings.map((item) => item.player_name), ["A", "B", "C", "D", "E", "F"]);
+
+  const secondPlaceTie = assignCompetitionRanks([
+    { ...base, id: 1, player_name: "A", correct_count: 5, total_time_ms: 10000, created_at: "2026-08-06T00:00:00.000Z" },
+    { ...base, id: 2, player_name: "B", correct_count: 4, total_time_ms: 9000, created_at: "2026-08-06T00:00:01.000Z" },
+    { ...base, id: 3, player_name: "C", correct_count: 4, total_time_ms: 9000, created_at: "2026-08-06T00:00:02.000Z" },
+    { ...base, id: 4, player_name: "D", correct_count: 3, total_time_ms: 8000, created_at: "2026-08-06T00:00:03.000Z" },
+  ]);
+  assert.deepEqual(secondPlaceTie.map((item) => item.rank), [1, 2, 2, 4]);
+});
+
+test("正解数を優先し、同じ正解数では合計時間を優先する", () => {
+  const base = { play_date: "2026-08-06", created_at: "2026-08-06T00:00:00.000Z" };
+  const rankings = assignCompetitionRanks([
+    { ...base, id: 1, player_name: "A", correct_count: 5, total_time_ms: 20000 },
+    { ...base, id: 2, player_name: "B", correct_count: 4, total_time_ms: 10000 },
+    { ...base, id: 3, player_name: "C", correct_count: 4, total_time_ms: 12000 },
+  ]);
+  assert.deepEqual(rankings.map((item) => item.rank), [1, 2, 3]);
 });
 
 test("POST /score は全値をバインドして登録し順位とトップを返す", async () => {
@@ -71,7 +106,10 @@ test("POST /score は全値をバインドして登録し順位とトップを�
         return { run: async () => ({ meta: { last_row_id: 42 } }) };
       } };
       if (sql.includes("COUNT(*)")) return { bind(...values) {
-        assert.equal(values.length, 11);
+        assert.equal(values.length, 4);
+        assert.deepEqual(values, ["2026-08-06", 4, 4, 24310]);
+        assert.doesNotMatch(sql, /created_at\s*</);
+        assert.doesNotMatch(sql, /id\s*</);
         return { first: async () => ({ rank: 8 }) };
       } };
       return { bind(date, limit) {

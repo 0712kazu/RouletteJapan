@@ -11,6 +11,14 @@ import {
 
 const pool = JSON.parse(await readFile(new URL("../data/daily-challenge-pool.json", import.meta.url)));
 
+function conservativeXLength(value) {
+  const urls = value.match(/https?:\/\/\S+/gu) ?? [];
+  const text = value.replace(/https?:\/\/\S+/gu, "");
+  return Array.from(text).reduce((length, character) => (
+    length + (character.codePointAt(0) <= 0x7f ? 1 : 2)
+  ), 0) + (urls.length * 23);
+}
+
 test("日本時間の日付キーを作る", () => {
   assert.equal(japanDateKey(new Date("2026-08-05T15:00:00.000Z")), "2026-08-06");
   assert.equal(japanDateKey(new Date("2026-08-05T14:59:59.999Z")), "2026-08-05");
@@ -57,21 +65,60 @@ test("回答はUnicode正規化と空白除去を行う", () => {
   assert.equal(isCorrectAnswer("さいたま", "さいたま市"), false);
 });
 
-test("X投稿文に日付、点数、時間を含める", () => {
-  const text = buildShareText({ dateKey: "2026-08-06", correctCount: 4, elapsedMs: 12340, url: "https://example.com/daily.html" });
-  assert.match(text, /5問中4問正解/);
-  assert.match(text, /12\.34秒/);
-  assert.match(text, /https:\/\/example\.com/);
-});
-
-test("X投稿文は取得できた順位と暫定トップを追加できる", () => {
+test("ランキング利用可能時のX投稿文は指定形式になる", () => {
   const text = buildShareText({
-    dateKey: "2026-08-06",
     correctCount: 4,
     elapsedMs: 12340,
     rank: 8,
     top: { correct_count: 5, total_time_ms: 9870 },
+    rankingAvailable: true,
   });
-  assert.match(text, /全国順位：8位/);
-  assert.match(text, /本日の暫定トップ：5\/5・9\.87秒/);
+  assert.equal(text, `🎯 今日の市区町村チャレンジ
+
+5問中 4問正解
+合計 12.34秒
+全国 8位
+
+本日の暫定トップ
+5問正解／9.87秒
+
+あなたも今日の5問に挑戦
+https://0712kazu.github.io/RouletteJapan/
+
+制作：@sukyuppa
+#市区町村ルーレット #地理クイズ`);
+  assert.equal((text.match(/🎯/gu) ?? []).length, 1);
+  assert.ok(Array.from(text).length <= 280);
+});
+
+test("ランキング停止時も保存済みトップ付きのX投稿文を生成できる", () => {
+  const text = buildShareText({
+    correctCount: 3,
+    elapsedMs: 45670,
+    top: { correct_count: 5, total_time_ms: 9870 },
+    rankingAvailable: false,
+  });
+  assert.match(text, /ランキングは現在利用できませんが、クイズは通常どおり遊べます。/);
+  assert.match(text, /停止前の暫定トップ\n5問正解／9\.87秒/);
+  assert.match(text, /制作：@sukyuppa/);
+  assert.equal((text.match(/🎯/gu) ?? []).length, 1);
+  assert.ok(Array.from(text).length <= 280);
+});
+
+test("ランキング停止時は保存値がなくてもX投稿文を生成できる", () => {
+  const text = buildShareText({ correctCount: 0, elapsedMs: 1000, rankingAvailable: false });
+  assert.doesNotMatch(text, /暫定トップ/);
+  assert.match(text, /https:\/\/0712kazu\.github\.io\/RouletteJapan\//);
+  assert.equal((text.match(/🎯/gu) ?? []).length, 1);
+  assert.ok(Array.from(text).length <= 280);
+});
+
+test("最長条件の投稿文もXの文字数上限内に収まる", () => {
+  const text = buildShareText({
+    correctCount: 5,
+    elapsedMs: 1_800_000,
+    top: { correct_count: 5, total_time_ms: 1_800_000 },
+    rankingAvailable: false,
+  });
+  assert.ok(conservativeXLength(text) <= 280);
 });

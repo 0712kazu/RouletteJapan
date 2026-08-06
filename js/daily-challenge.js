@@ -67,7 +67,7 @@ const state = {
   questionStartedAt: 0,
   layer: null,
   source: "fallback",
-  submissionId: crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
+  submissionId: globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
 };
 
 function apiUrl(path) {

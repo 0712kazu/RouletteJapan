@@ -51,3 +51,25 @@ test("OPTIONSはD1なしでも応答する", async () => {
   assert.equal(response.status, 204);
   assert.equal(response.headers.get("access-control-allow-origin"), "https://quiz.example.com");
 });
+
+test("GET /api/daily はD1候補から共通5問を返す", async () => {
+  const rows = pool.municipalities.map((item) => ({
+    code: item.code,
+    name: item.name,
+    pref_code: item.prefCode,
+    prefecture: item.prefecture,
+    population_band: item.populationBand,
+  }));
+  const env = {
+    DB: {
+      prepare() {
+        return { all: async () => ({ results: rows }) };
+      },
+    },
+  };
+  const response = await worker.fetch(new Request("https://example.com/api/daily"), env);
+  const payload = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(payload.questions.length, 5);
+  assert.deepEqual(payload.questions, selectDailyQuestions(pool.municipalities, payload.dateKey));
+});

@@ -13,7 +13,7 @@ body {
     linear-gradient(90deg, transparent 31px, rgba(169, 54, 42, 0.16) 32px, transparent 33px),
     repeating-linear-gradient(0deg, transparent 0 27px, rgba(21, 44, 60, 0.055) 28px),
     var(--atlas-paper);
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", serif;
+  font-family: "M PLUS Rounded 1c", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
 }
 
 .daily-shell {
@@ -43,7 +43,7 @@ body {
 .share-panel label,
 .map-zoom-out,
 .daily-shell footer {
-  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-family: inherit;
 }
 
 .daily-shell .eyebrow {
@@ -119,14 +119,9 @@ body {
 
 .intro-card {
   max-width: none;
-  min-height: 460px;
+  min-height: 0;
   margin: 0;
   text-align: center;
-}
-
-.intro-card > p:not(.daily-date):not(.service-note) {
-  margin-top: 24px;
-  font-size: 1.05rem;
 }
 
 .question-intro-card {
@@ -169,16 +164,44 @@ body {
   letter-spacing: 0.06em;
 }
 
-.daily-rules {
-  display: inline-grid;
-  gap: 7px;
-  margin: 20px auto 24px;
-  padding: 16px 22px 16px 42px;
+.rules-panel {
+  width: min(680px, 100%);
+  margin: 16px auto 12px;
+  padding: 14px 18px;
   border: 1px solid var(--atlas-ink);
-  color: var(--atlas-ink);
   background: rgba(242, 234, 212, 0.82);
-  line-height: 1.7;
   text-align: left;
+}
+
+.rules-panel h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
+
+.daily-rules {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 1.35rem;
+  color: var(--atlas-ink);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.rule-notes,
+.ranking-capacity-note {
+  color: rgba(21, 44, 60, 0.72);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.rule-notes {
+  margin: 9px 0 0;
+}
+
+.ranking-capacity-note {
+  margin: 0 0 10px;
 }
 
 .service-note {
@@ -365,7 +388,7 @@ body {
   background: var(--atlas-red);
   box-shadow: none;
   cursor: pointer;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-family: inherit;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -442,7 +465,7 @@ body {
 
 .score-grid span {
   color: var(--atlas-ink);
-  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-family: inherit;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -532,7 +555,7 @@ body {
 .ranking-summary p {
   margin: 0;
   padding: 10px;
-  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-family: inherit;
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -590,6 +613,15 @@ body {
   .daily-card,
   .daily-quiz {
     padding: 20px 14px 24px 28px;
+  }
+
+  .rules-panel {
+    padding: 12px;
+  }
+
+  .daily-rules {
+    font-size: 0.78rem;
+    line-height: 1.45;
   }
 
   .daily-status-row {

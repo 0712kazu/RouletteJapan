@@ -7,7 +7,7 @@
     {
       "binding": "DB",
       "database_name": "roulette-japan",
-      "database_id": "REPLACE_WITH_EXISTING_D1_DATABASE_ID"
+      "database_id": "b891e47a-6842-4b00-a48e-9e599e8e6dcf"
     }
   ],
   "vars": {

@@ -197,7 +197,7 @@ function submitAnswer(event) {
   const question = state.questions[state.currentIndex];
   const elapsedMs = Math.max(0, Math.round(performance.now() - state.questionStartedAt));
   const input = elements.answerInput.value;
-  const correct = isCorrectAnswer(input, question.name);
+  const correct = isCorrectAnswer(input, question);
   state.results.push({ ...question, input, correct, elapsedMs });
 
   elements.answerInput.disabled = true;

@@ -1,12 +1,10 @@
 export const DAILY_QUESTION_COUNT = 5;
-export const SHARE_CHALLENGE_URL = "https://0712kazu.github.io/RouletteJapan/";
+export const SHARE_CHALLENGE_URL = "https://0712kazu.github.io/RouletteJapan/daily.html";
 
 export const DAILY_DIFFICULTY_PLAN = [
-  { difficulty: "easy", populationBand: "mega" },
-  { difficulty: "normal", populationBand: "large" },
-  { difficulty: "hard", populationBand: "medium" },
-  { difficulty: "hard", populationBand: "small" },
-  { difficulty: "hard", populationBand: "compact" },
+  { difficulty: "easy", populationBand: "easy", count: 1 },
+  { difficulty: "normal", populationBand: "normal", count: 1 },
+  { difficulty: "hard", populationBand: "hard", count: 3 },
 ];
 
 export function japanDateKey(date = new Date()) {
@@ -31,7 +29,7 @@ export function hashString(value) {
 
 function shuffledForBand(candidates, populationBand) {
   const shuffled = [...candidates];
-  let state = hashString(`daily-rotation-v1:${populationBand}`) || 1;
+  let state = hashString(`daily-rotation-v2:${populationBand}`) || 1;
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     state ^= state << 13;
     state ^= state >>> 17;
@@ -55,34 +53,50 @@ export function selectDailyQuestions(pool, dateKey) {
   const questions = [];
   const dayNumber = dateOrdinal(dateKey);
 
-  if (DAILY_DIFFICULTY_PLAN.length !== DAILY_QUESTION_COUNT) {
+  if (DAILY_DIFFICULTY_PLAN.reduce((sum, item) => sum + item.count, 0) !== DAILY_QUESTION_COUNT) {
     throw new Error(`難易度設定は${DAILY_QUESTION_COUNT}問分必要です`);
   }
 
-  DAILY_DIFFICULTY_PLAN.forEach(({ difficulty, populationBand }) => {
+  DAILY_DIFFICULTY_PLAN.forEach(({ difficulty, populationBand, count }) => {
     if (!availableBands.has(populationBand)) {
       throw new Error(`${populationBand} の人口区分がありません`);
     }
     const candidates = pool.municipalities
-      .filter((item) => item.populationBand === populationBand && !selectedCodes.has(item.code))
+      .filter((item) => item.populationBand === populationBand)
       .sort((a, b) => a.code.localeCompare(b.code));
-    if (candidates.length === 0) throw new Error(`${populationBand} の重複しない問題候補がありません`);
+    if (candidates.length < count) throw new Error(`${populationBand} の重複しない問題候補が足りません`);
 
     const rotation = shuffledForBand(candidates, populationBand);
-    const selected = rotation[((dayNumber % rotation.length) + rotation.length) % rotation.length];
-    selectedCodes.add(selected.code);
-    questions.push({ ...selected, difficulty });
+    const start = (((dayNumber * count) % rotation.length) + rotation.length) % rotation.length;
+    for (let offset = 0; offset < count; offset += 1) {
+      const selected = rotation[(start + offset) % rotation.length];
+      if (selectedCodes.has(selected.code)) throw new Error("同じ日の問題が重複しました");
+      selectedCodes.add(selected.code);
+      questions.push({ ...selected, difficulty });
+    }
   });
 
   return questions;
 }
 
 export function normalizeMunicipalityName(value) {
-  return String(value ?? "").normalize("NFKC").replace(/[\s　]/g, "").toLocaleLowerCase("ja-JP");
+  return String(value ?? "").normalize("NFKC").replace(/\s/gu, "").toLocaleLowerCase("ja-JP");
 }
 
-export function isCorrectAnswer(input, answer) {
-  return normalizeMunicipalityName(input) === normalizeMunicipalityName(answer);
+export function acceptedAnswerForms(question) {
+  if (typeof question === "string") return [normalizeMunicipalityName(question)];
+  if (!question || typeof question !== "object" || !question.name) return [];
+
+  const prefixes = ["", question.prefecture];
+  if (question.district) {
+    prefixes.push(question.district, `${question.prefecture}${question.district}`);
+  }
+  return [...new Set(prefixes.map((prefix) => normalizeMunicipalityName(`${prefix ?? ""}${question.name}`)))];
+}
+
+export function isCorrectAnswer(input, question) {
+  const normalizedInput = normalizeMunicipalityName(input);
+  return normalizedInput.length > 0 && acceptedAnswerForms(question).includes(normalizedInput);
 }
 
 export function formatElapsed(milliseconds) {
@@ -91,7 +105,7 @@ export function formatElapsed(milliseconds) {
 
 export function buildShareText({ correctCount, elapsedMs, rank = null, top = null, rankingAvailable = false }) {
   const lines = [
-    "🎯 今日の市区町村チャレンジ",
+    "🎯 きょうの市区町村クイズ",
     "",
     `5問中 ${correctCount}問正解`,
     `合計 ${formatElapsed(elapsedMs)}`,
@@ -112,7 +126,7 @@ export function buildShareText({ correctCount, elapsedMs, rank = null, top = nul
 
   lines.push(
     "",
-    "あなたも今日の5問に挑戦",
+    "あなたも挑戦",
     SHARE_CHALLENGE_URL,
     "",
     "制作：@sukyuppa",

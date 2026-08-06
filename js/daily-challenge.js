@@ -243,20 +243,19 @@ function showResults() {
   elements.resultTime.textContent = formatElapsed(totalTimeMs);
   renderResultList();
 
-  updateShareText({ top: loadSavedTopScore() });
+  updateShareText({ top: loadSavedTopScore(), rankingAvailable: false });
   loadRanking();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function updateShareText({ rank = null, top = null } = {}) {
+function updateShareText({ rank = null, top = null, rankingAvailable = false } = {}) {
   const { correctCount, totalTimeMs } = scoreSummary();
   const shareText = buildShareText({
-    dateKey: state.dateKey,
     correctCount,
     elapsedMs: totalTimeMs,
     rank,
     top,
-    url: new URL("daily.html", window.location.href).href,
+    rankingAvailable,
   });
   elements.shareText.value = shareText;
   elements.xShareLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
@@ -296,7 +295,7 @@ function loadSavedTopScore() {
   }
 }
 
-function renderRankingSummary({ rank = null, top = null } = {}) {
+function renderRankingSummary({ rank = null, top = null, rankingAvailable = true } = {}) {
   const { correctCount, totalTimeMs } = scoreSummary();
   const lines = [`あなたの記録：${correctCount}/5・${formatElapsed(totalTimeMs)}`];
   if (Number.isInteger(rank) && rank > 0) lines.push(`全国順位：${rank}位`);
@@ -306,11 +305,11 @@ function renderRankingSummary({ rank = null, top = null } = {}) {
     paragraph.textContent = text;
     return paragraph;
   }));
-  updateShareText({ rank, top });
+  updateShareText({ rank, top, rankingAvailable });
 }
 
 function showRankingUnavailable() {
-  renderRankingSummary({ top: loadSavedTopScore() });
+  renderRankingSummary({ top: loadSavedTopScore(), rankingAvailable: false });
   elements.rankingStatus.textContent = RANKING_UNAVAILABLE_MESSAGE;
   elements.rankingList.replaceChildren();
 }
@@ -328,7 +327,7 @@ async function loadRanking(rank = null) {
   } catch (error) {
     console.info("ランキングを取得できませんでした。", error.message);
     if (Number.isInteger(rank) && rank > 0) {
-      renderRankingSummary({ rank, top: loadSavedTopScore() });
+      renderRankingSummary({ rank, top: loadSavedTopScore(), rankingAvailable: false });
       elements.rankingStatus.textContent = RANKING_UNAVAILABLE_MESSAGE;
       elements.rankingList.replaceChildren();
     } else {

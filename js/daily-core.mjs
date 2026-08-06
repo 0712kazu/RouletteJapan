@@ -1,4 +1,5 @@
 export const DAILY_QUESTION_COUNT = 5;
+export const SHARE_CHALLENGE_URL = "https://0712kazu.github.io/RouletteJapan/";
 
 export const DAILY_DIFFICULTY_PLAN = [
   { difficulty: "easy", populationBand: "mega" },
@@ -88,16 +89,34 @@ export function formatElapsed(milliseconds) {
   return `${(Math.max(0, milliseconds) / 1000).toFixed(2)}秒`;
 }
 
-export function buildShareText({ dateKey, correctCount, elapsedMs, rank = null, top = null, url }) {
+export function buildShareText({ correctCount, elapsedMs, rank = null, top = null, rankingAvailable = false }) {
   const lines = [
-    `きょうの市区町村クイズ ${dateKey.replaceAll("-", "/")}`,
-    `5問中${correctCount}問正解・合計${formatElapsed(elapsedMs)}`,
+    "🎯 今日の市区町村チャレンジ",
+    "",
+    `5問中 ${correctCount}問正解`,
+    `合計 ${formatElapsed(elapsedMs)}`,
   ];
-  if (Number.isInteger(rank) && rank > 0) lines.push(`全国順位：${rank}位`);
-  if (top && Number.isInteger(top.correct_count) && Number.isInteger(top.total_time_ms)) {
-    lines.push(`本日の暫定トップ：${top.correct_count}/5・${formatElapsed(top.total_time_ms)}`);
+
+  const hasTop = top && Number.isInteger(top.correct_count) && Number.isInteger(top.total_time_ms);
+  if (rankingAvailable) {
+    if (Number.isInteger(rank) && rank > 0) lines.push(`全国 ${rank}位`);
+    if (hasTop) {
+      lines.push("", "本日の暫定トップ", `${top.correct_count}問正解／${formatElapsed(top.total_time_ms)}`);
+    }
+  } else {
+    lines.push("", "ランキングは現在利用できませんが、クイズは通常どおり遊べます。");
+    if (hasTop) {
+      lines.push("", "停止前の暫定トップ", `${top.correct_count}問正解／${formatElapsed(top.total_time_ms)}`);
+    }
   }
-  lines.push("#市区町村ルーレット #地理クイズ");
-  if (url) lines.push(url);
+
+  lines.push(
+    "",
+    "あなたも今日の5問に挑戦",
+    SHARE_CHALLENGE_URL,
+    "",
+    "制作：@sukyuppa",
+    "#市区町村ルーレット #地理クイズ",
+  );
   return lines.join("\n");
 }

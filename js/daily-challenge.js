@@ -8,6 +8,7 @@ import {
 
 const API_BASE = document.querySelector('meta[name="daily-api-base"]')?.content?.replace(/\/$/, "") ?? "";
 const QUESTION_COUNT = 5;
+const QUESTION_INTRO_MS = 2000;
 const JAPAN_BOUNDS = L.latLngBounds([20.2, 122.8], [46.2, 154.1]);
 
 const elements = {
@@ -26,6 +27,8 @@ const elements = {
   nextButton: document.querySelector("#next-button"),
   playerName: document.querySelector("#player-name"),
   populationBadge: document.querySelector("#population-badge"),
+  questionIntroText: document.querySelector("#question-intro-text"),
+  questionIntroView: document.querySelector("#question-intro-view"),
   questionProgress: document.querySelector("#question-progress"),
   quizView: document.querySelector("#quiz-view"),
   rankingForm: document.querySelector("#ranking-form"),
@@ -160,13 +163,24 @@ async function showQuestion() {
   }
 }
 
+function showQuestionIntro() {
+  elements.quizView.hidden = true;
+  elements.questionIntroText.textContent = `第${state.currentIndex + 1}問！`;
+  elements.questionIntroView.hidden = false;
+
+  window.setTimeout(() => {
+    elements.questionIntroView.hidden = true;
+    elements.quizView.hidden = false;
+    window.requestAnimationFrame(() => {
+      map.invalidateSize();
+      showQuestion();
+    });
+  }, QUESTION_INTRO_MS);
+}
+
 function startChallenge() {
   elements.introView.hidden = true;
-  elements.quizView.hidden = false;
-  window.requestAnimationFrame(() => {
-    map.invalidateSize();
-    showQuestion();
-  });
+  showQuestionIntro();
 }
 
 function submitAnswer(event) {
@@ -191,7 +205,7 @@ function submitAnswer(event) {
 function goNext() {
   state.currentIndex += 1;
   if (state.currentIndex < QUESTION_COUNT) {
-    showQuestion();
+    showQuestionIntro();
   } else {
     showResults();
   }

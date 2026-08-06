@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/daily.css">
+    <link rel="stylesheet" href="css/daily.css?v=2">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   </head>
   <body>
@@ -26,17 +26,20 @@
         <a class="back-link" href="index.html">通常ルーレットへ</a>
       </header>
 
-      <section id="intro-view" class="daily-card intro-card" aria-labelledby="intro-heading">
+      <section id="intro-view" class="daily-card intro-card" aria-label="デイリーチャレンジの説明">
         <p id="daily-date" class="daily-date">読み込み中…</p>
-        <h2 id="intro-heading">形だけで、まちを当てよう。</h2>
-        <p>人口規模の異なる5つの区分から1問ずつ出題します。市区町村名を入力して回答してください。</p>
+        <p>市区町村名を入力して回答してください。</p>
         <ul class="daily-rules">
           <li>全5問、時間制限なし</li>
           <li>正解数と回答にかかった合計時間を記録</li>
-          <li>ランキングにつながらなくても最後まで遊べます</li>
+          <li>ランキングの掲載にはサーバーの関係上、上限があります。</li>
         </ul>
         <p id="load-status" class="service-note" role="status"></p>
         <button id="daily-start-button" class="start-button" type="button" disabled>5問に挑戦</button>
+      </section>
+
+      <section id="question-intro-view" class="daily-card question-intro-card" hidden aria-live="polite">
+        <p id="question-intro-text" class="question-intro-text">第1問！</p>
       </section>
 
       <section id="quiz-view" class="daily-quiz" hidden aria-labelledby="question-title">
@@ -103,6 +106,6 @@
         <p>人口区分：総務省統計局「令和2年国勢調査」をもとに分類。境界データ：国土交通省「国土数値情報」を加工。</p>
       </footer>
     </main>
-    <script type="module" src="js/daily-challenge.js"></script>
+    <script type="module" src="js/daily-challenge.js?v=2"></script>
   </body>
 </html>

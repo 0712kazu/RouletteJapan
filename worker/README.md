@@ -1,33 +1,80 @@
-# Daily challenge Worker
+# Roulette Japan API
 
-日替わり5問の配信とD1ランキングを提供するCloudflare Workerです。フロントエンドはこのAPIに接続できない場合、リポジトリ同梱の問題プールへ自動的に切り替わります。
+Cloudflare Workersと既存D1データベースを使い、デイリーチャレンジのランキングを提供します。R2は使用しません。
+
+## 前提となるCloudflare設定
+
+- Worker名: `roulette-japan-api`
+- D1データベース名: `roulette-japan`
+- D1バインディング名: `DB`
+- テーブル名: `daily_scores`
+
+このWorkerは既存の次のテーブルを利用し、マイグレーションは実行しません。
+
+```sql
+CREATE TABLE daily_scores (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  play_date TEXT NOT NULL,
+  player_name TEXT NOT NULL,
+  correct_count INTEGER NOT NULL,
+  total_time_ms INTEGER NOT NULL,
+  created_at TEXT NOT NULL
+);
+```
 
 ## セットアップ
 
-1. `npm install`
-2. `npx wrangler d1 create roulette-japan-daily`
-3. 出力されたIDを `wrangler.toml` の `database_id` に設定
-4. `npm run generate:seed`
-5. `npx wrangler d1 migrations apply roulette-japan-daily --local`（ローカル確認）
-6. `npx wrangler d1 migrations apply roulette-japan-daily --remote`（本番反映時）
-7. `ALLOWED_ORIGIN` を公開サイトのOriginへ変更
-
-フロントエンドとWorkerが別Originの場合は、`daily.html` に次の設定を追加します。
-
-```html
-<meta name="daily-api-base" content="https://your-worker.example.workers.dev">
-```
-
-## API
-
-- `GET /api/daily`: 日本時間の当日5問を返す
-- `GET /api/rankings?date=YYYY-MM-DD`: 当日の上位20件を返す
-- `POST /api/rankings`: `{ submissionId, dateKey, playerName, correctCount, totalTimeMs }` を登録
-
-## テスト
+Node.js 20以上を使用してください。
 
 ```sh
+npm install
+npm run build
 npm test
 ```
 
-スコアはクライアント申告値です。競技性を高める場合は、チャレンジ開始トークンとサーバー側採点を追加してください。
+`wrangler.jsonc` の `database_id` を、バインド済みの既存D1データベースIDへ置き換えてください。秘密情報やAPIトークンはファイルへ記載しません。
+
+本番Originは `ALLOWED_ORIGINS` に設定します。複数Originはカンマ区切りです。ローカル確認では、コミットせず次のように追加できます。
+
+```sh
+npx wrangler dev --var ALLOWED_ORIGINS:"https://0712kazu.github.io,http://localhost:8000,http://localhost:4173"
+```
+
+フロント側のWorker URLは `../js/api-config.mjs` の1か所で設定します。
+
+## API
+
+### `GET /health`
+
+D1へバインドクエリを実行し、正常時は次を返します。
+
+```json
+{ "status": "ok", "database": "ok" }
+```
+
+### `GET /ranking?date=YYYY-MM-DD`
+
+指定日の上位100件を、正解数降順、合計時間昇順、作成日時昇順で返します。
+
+### `POST /score`
+
+```json
+{
+  "play_date": "2026-08-06",
+  "player_name": "KAZU",
+  "correct_count": 4,
+  "total_time_ms": 24310
+}
+```
+
+登録結果に加え、登録時点の全国順位と暫定トップを返します。`created_at` はWorkerがUTCのISO 8601形式で生成します。合計時間の上限は30分です。
+
+## ローカル確認
+
+```sh
+npm run dev
+curl http://localhost:8787/health
+curl "http://localhost:8787/ranking?date=2026-08-06"
+```
+
+本番デプロイはこの手順には含めません。Workers Free・D1 Freeの範囲で動作し、R2への接続はありません。

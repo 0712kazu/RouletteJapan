@@ -1,12 +1,15 @@
 {
-  "name": "roulette-japan-daily-worker",
+  "name": "roulette-japan-api",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/*.test.mjs",
-    "generate:seed": "node scripts/generate-seed.mjs"
+    "build": "tsc",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "dev": "wrangler dev"
   },
   "devDependencies": {
-    "wrangler": "^4.28.1"
+    "@cloudflare/workers-types": "4.20260702.1",
+    "typescript": "^5.9.2",
+    "wrangler": "4.28.1"
   }
 }

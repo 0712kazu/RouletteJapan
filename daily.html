@@ -43,6 +43,13 @@
         <p class="ranking-capacity-note">ランキングの掲載にはサーバーの関係上、上限があります。</p>
         <p id="load-status" class="service-note" role="status"></p>
         <button id="daily-start-button" class="start-button" type="button" disabled>五問に挑戦する</button>
+        <div class="intro-ranking">
+          <h3>今日のランキング TOP10</h3>
+          <p id="intro-ranking-status" class="service-note" role="status">
+            ランキングを読み込んでいます…
+          </p>
+          <ol id="intro-ranking-list" class="ranking-list"></ol>
+        </div>
       </section>
 
       <section id="question-intro-view" class="daily-card question-intro-card" hidden aria-live="polite">

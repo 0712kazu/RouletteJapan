@@ -583,6 +583,10 @@ body {
     width: min(100% - 18px, 980px);
   }
 
+  .intro-ranking {
+    padding: 14px 8px 0;
+  }
+
   .daily-shell .app-header {
     align-items: flex-start;
     padding: 17px 14px 14px 28px;
@@ -667,4 +671,26 @@ body {
     border-top: 1px solid var(--atlas-ink);
     border-left: 0;
   }
+}
+
+.intro-ranking {
+  width: min(720px, 100%);
+  margin: 20px auto 0;
+  padding: 16px 18px;
+  border-top: 1px solid rgba(21, 44, 60, 0.18);
+}
+
+.intro-ranking h3 {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.intro-ranking .service-note {
+  margin: 0;
+  text-align: center;
+}
+
+.intro-ranking .ranking-list {
+  margin: 12px 0 0;
 }

@@ -23,6 +23,8 @@ const elements = {
   feedbackAnswer: document.querySelector("#feedback-answer"),
   feedbackTitle: document.querySelector("#feedback-title"),
   introView: document.querySelector("#intro-view"),
+  introRankingList: document.getElementById("intro-ranking-list"),
+  introRankingStatus: document.getElementById("intro-ranking-status"),
   loadStatus: document.querySelector("#load-status"),
   mapLoading: document.querySelector("#map-loading"),
   nextButton: document.querySelector("#next-button"),
@@ -143,6 +145,7 @@ async function loadChallenge() {
   } else {
   elements.startButton.disabled = false;
   }
+  await loadIntroRanking();
 }
 
 async function loadFeature(question) {
@@ -297,6 +300,43 @@ function renderRanking(entries) {
     item.textContent = `${entry.rank ?? index + 1}位 ${entry.player_name} — ${entry.correct_count}/5・${formatElapsed(entry.total_time_ms)}`;
     return item;
   }));
+}
+
+function renderIntroRanking(entries) {
+  const topTen = entries.slice(0, 10);
+
+  elements.introRankingList.replaceChildren(...topTen.map((entry, index) => {
+    const item = document.createElement("li");
+
+    item.textContent =
+      `${entry.rank ?? index + 1}位 ${entry.player_name} — ` +
+      `${entry.correct_count}/5・${formatElapsed(entry.total_time_ms)}`;
+
+    return item;
+  }));
+}
+
+async function loadIntroRanking() {
+  try {
+    const payload = await fetchJson(
+      apiUrl(`/ranking?date=${encodeURIComponent(state.dateKey)}`)
+    );
+
+    const rankings = payload.rankings ?? [];
+
+    renderIntroRanking(rankings);
+
+    elements.introRankingStatus.textContent = rankings.length
+      ? "正解数が多く、合計時間が短い順です。"
+      : "今日の登録はまだありません。";
+  } catch (error) {
+    console.info("開始前ランキングを取得できませんでした。", error.message);
+
+    elements.introRankingStatus.textContent =
+      "ランキングは現在利用できません。";
+
+    elements.introRankingList.replaceChildren();
+  }
 }
 
 function rankingCacheKey() {

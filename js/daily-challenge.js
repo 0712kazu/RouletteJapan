@@ -87,42 +87,28 @@ const state = {
 };
 
 function updateMobileLayout() {
-  if (!window.visualViewport) return;
   if (!document.body.classList.contains("is-daily-playing")) return;
 
-  const viewportHeight = window.visualViewport.height;
-  const keyboardVisible = viewportHeight < window.innerHeight - 120;
+  const viewport = window.visualViewport;
+  const viewportHeight = viewport?.height ?? window.innerHeight;
+  const viewportTop = viewport?.offsetTop ?? 0;
+  const keyboardVisible = viewport
+    ? viewportHeight < window.innerHeight - 120
+    : false;
 
   document.documentElement.style.setProperty(
     "--daily-visual-height",
     `${viewportHeight}px`
   );
-
-  document.body.classList.toggle(
-    "is-keyboard-visible",
-    keyboardVisible
+  document.documentElement.style.setProperty(
+    "--daily-visual-top",
+    `${viewportTop}px`
   );
+
+  document.body.classList.toggle("is-keyboard-visible", keyboardVisible);
 
   window.requestAnimationFrame(() => {
     map.invalidateSize();
-  });
-}
-
-function keepQuizVisible() {
-  if (!document.body.classList.contains("is-daily-playing")) return;
-
-  window.requestAnimationFrame(() => {
-    const viewport = window.visualViewport;
-    const quizTop =
-      elements.quizView.getBoundingClientRect().top + window.scrollY;
-
-    const offsetTop = viewport?.offsetTop ?? 0;
-
-    window.scrollTo({
-      top: Math.max(0, quizTop - offsetTop - 8),
-      left: 0,
-      behavior: "instant",
-    });
   });
 }
 
@@ -178,12 +164,11 @@ async function loadChallenge() {
 
   elements.dailyDate.textContent = formatDateLabel(state.dateKey);
   if (hasPlayedToday()) {
-  elements.loadStatus.textContent =
-    "本日のチャレンジは完了しました。次回は0:00に新しい問題が配信されます。";
-
-  elements.startButton.disabled = true;
+    elements.loadStatus.textContent =
+      "本日のチャレンジは完了しました。次回は0:00に新しい問題が配信されます。";
+    elements.startButton.disabled = true;
   } else {
-  elements.startButton.disabled = false;
+    elements.startButton.disabled = false;
   }
   await loadIntroRanking();
 }
@@ -216,7 +201,7 @@ function showFeature(feature) {
 async function showQuestion() {
   const question = state.questions[state.currentIndex];
   if (state.currentIndex === QUESTION_COUNT - 1) {
-  markPlayedToday();
+    markPlayedToday();
   }
   elements.questionProgress.textContent = `第${state.currentIndex + 1}問`;
   elements.populationBadge.textContent = `凡例｜人口区分：${state.bands.get(question.populationBand)}`;
@@ -238,7 +223,11 @@ async function showQuestion() {
     elements.answerInput.disabled = false;
     elements.answerButton.disabled = false;
     state.questionStartedAt = performance.now();
-    elements.answerInput.focus();
+    try {
+      elements.answerInput.focus({ preventScroll: true });
+    } catch {
+      elements.answerInput.focus();
+    }
   } catch (error) {
     elements.mapLoading.textContent = `${error.message} 再読み込みしてください。`;
   }
@@ -253,6 +242,7 @@ function showQuestionIntro() {
     elements.questionIntroView.hidden = true;
     elements.quizView.hidden = false;
     window.requestAnimationFrame(() => {
+      updateMobileLayout();
       map.invalidateSize();
       showQuestion();
     });
@@ -282,7 +272,11 @@ function submitAnswer(event) {
   elements.feedbackTitle.textContent = correct ? "正解！" : "惜しい！";
   elements.feedbackAnswer.textContent = `答え：${question.prefecture} ${question.name}（${formatElapsed(elapsedMs)}）`;
   elements.nextButton.textContent = state.currentIndex === QUESTION_COUNT - 1 ? "結果を見る" : "次の問題へ";
-  elements.nextButton.focus();
+  try {
+    elements.nextButton.focus({ preventScroll: true });
+  } catch {
+    elements.nextButton.focus();
+  }
 }
 
 function goNext() {
@@ -315,6 +309,7 @@ function showResults() {
   document.body.classList.remove("is-daily-playing");
   document.body.classList.remove("is-keyboard-visible");
   document.documentElement.style.removeProperty("--daily-visual-height");
+  document.documentElement.style.removeProperty("--daily-visual-top");
   elements.quizView.hidden = true;
   elements.resultView.hidden = false;
   elements.resultScore.textContent = `${correctCount} / ${QUESTION_COUNT}`;
@@ -352,11 +347,9 @@ function renderIntroRanking(entries) {
 
   elements.introRankingList.replaceChildren(...topTen.map((entry, index) => {
     const item = document.createElement("li");
-
     item.textContent =
       `${entry.rank ?? index + 1}位 ${entry.player_name} — ` +
       `${entry.correct_count}/5・${formatElapsed(entry.total_time_ms)}`;
-
     return item;
   }));
 }
@@ -366,20 +359,14 @@ async function loadIntroRanking() {
     const payload = await fetchJson(
       apiUrl(`/ranking?date=${encodeURIComponent(state.dateKey)}`)
     );
-
     const rankings = payload.rankings ?? [];
-
     renderIntroRanking(rankings);
-
     elements.introRankingStatus.textContent = rankings.length
       ? "正解数が多く、合計時間が短い順です。"
       : "今日の登録はまだありません。";
   } catch (error) {
     console.info("開始前ランキングを取得できませんでした。", error.message);
-
-    elements.introRankingStatus.textContent =
-      "ランキングは現在利用できません。";
-
+    elements.introRankingStatus.textContent = "ランキングは現在利用できません。";
     elements.introRankingList.replaceChildren();
   }
 }
@@ -506,17 +493,4 @@ loadChallenge().catch((error) => {
 window.visualViewport?.addEventListener("resize", updateMobileLayout);
 window.visualViewport?.addEventListener("scroll", updateMobileLayout);
 window.addEventListener("resize", updateMobileLayout);
-
-elements.answerInput.addEventListener("focus", () => {
-  updateMobileLayout();
-
-  setTimeout(() => {
-    keepQuizVisible();
-    updateMobileLayout();
-  }, 100);
-
-  setTimeout(() => {
-    keepQuizVisible();
-    updateMobileLayout();
-  }, 350);
-});
+elements.answerInput.addEventListener("focus", updateMobileLayout);

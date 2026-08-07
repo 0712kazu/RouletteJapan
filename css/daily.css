@@ -671,6 +671,152 @@ body {
     border-top: 1px solid var(--atlas-ink);
     border-left: 0;
   }
+
+  body.is-daily-playing .daily-shell {
+  width: 100%;
+  max-width: none;
+  padding-top: 0;
+  }
+
+  body.is-daily-playing .daily-shell .app-header,
+  body.is-daily-playing .daily-shell footer {
+    display: none;
+  }
+
+  body.is-daily-playing .daily-quiz {
+    padding: 8px 10px 10px;
+    border-top: 3px double var(--atlas-ink);
+    box-shadow: none;
+  }
+
+  body.is-daily-playing .daily-status-row {
+    margin-bottom: 4px;
+    padding-bottom: 5px;
+  }
+
+  body.is-daily-playing .daily-quiz h2 {
+    font-size: 1rem;
+  }
+
+  body.is-daily-playing .question-steps {
+    margin: 5px 0;
+  }
+
+  body.is-daily-playing #daily-map {
+    height: 34vh;
+    min-height: 180px;
+    max-height: 260px;
+  }
+
+  body.is-daily-playing .answer-form {
+    margin-top: 8px;
+  }
+
+  body.is-daily-playing .answer-form label {
+    padding: 4px 8px;
+    font-size: 0.68rem;
+  }
+
+  body.is-daily-playing .answer-row {
+    gap: 6px;
+  }
+
+  body.is-daily-playing .answer-row input {
+    min-height: 40px;
+  }
+
+  body.is-daily-playing .answer-row .start-button {
+    min-height: 40px;
+  }
+
+  body.is-daily-playing.is-keyboard-visible {
+    overflow: hidden;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .daily-shell {
+    height: var(--daily-visual-height);
+    overflow: hidden;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .daily-quiz {
+    box-sizing: border-box;
+    height: var(--daily-visual-height);
+    padding: 4px 8px 6px;
+    overflow: hidden;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .daily-status-row {
+    gap: 4px;
+    margin-bottom: 2px;
+    padding-bottom: 3px;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .daily-status-row h2 {
+    margin: 0;
+    font-size: 0.88rem;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .daily-status-row .eyebrow {
+    margin: 0;
+    font-size: 0.65rem;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .population-badge {
+    font-size: 0.62rem;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .question-steps {
+    grid-template-columns: repeat(5, 24px);
+    gap: 3px;
+    margin: 3px 0;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .question-steps span {
+    height: 24px;
+    font-size: 0.62rem;
+  }
+
+  body.is-daily-playing.is-keyboard-visible #daily-map {
+    height: clamp(120px, 30vh, 190px);
+    min-height: 120px;
+    max-height: 190px;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .map-zoom-out {
+    top: 6px;
+    left: 6px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 2px 5px;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .answer-form {
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .answer-form label {
+    padding: 2px 6px;
+    font-size: 0.62rem;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .answer-row {
+    grid-template-columns: 1fr auto;
+    gap: 5px;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .answer-row input {
+    min-height: 36px;
+    padding: 4px 5px;
+    font-size: 16px;
+  }
+
+  body.is-daily-playing.is-keyboard-visible .answer-row .start-button {
+    width: auto;
+    min-height: 36px;
+    padding: 4px 9px;
+    font-size: 0.72rem;
+  }
 }
 
 .intro-ranking {

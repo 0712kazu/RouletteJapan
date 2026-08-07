@@ -107,6 +107,26 @@ function formatDateLabel(dateKey) {
   return `${year}年${Number(month)}月${Number(day)}日（日本時間）`;
 }
 
+function playedCacheKey() {
+  return `roulette-japan:daily-played:${state.dateKey}`;
+}
+
+function hasPlayedToday() {
+  try {
+    return localStorage.getItem(playedCacheKey()) === "done";
+  } catch {
+    return false;
+  }
+}
+
+function markPlayedToday() {
+  try {
+    localStorage.setItem(playedCacheKey(), "done");
+  } catch (error) {
+    console.info("プレイ済み状態を保存できませんでした。", error.name);
+  }
+}
+
 async function loadChallenge() {
   const pool = await fetchJson("data/daily-challenge-pool.json", {}, 6000);
   state.dateKey = japanDateKey();
@@ -115,7 +135,14 @@ async function loadChallenge() {
   elements.loadStatus.textContent = "今日の共通問題を準備しました。";
 
   elements.dailyDate.textContent = formatDateLabel(state.dateKey);
+  if (hasPlayedToday()) {
+  elements.loadStatus.textContent =
+    "本日のチャレンジは完了しました。次回は0:00に新しい問題が配信されます。";
+
+  elements.startButton.disabled = true;
+  } else {
   elements.startButton.disabled = false;
+  }
 }
 
 async function loadFeature(question) {
@@ -145,6 +172,9 @@ function showFeature(feature) {
 
 async function showQuestion() {
   const question = state.questions[state.currentIndex];
+  if (state.currentIndex === QUESTION_COUNT - 1) {
+  markPlayedToday();
+  }
   elements.questionProgress.textContent = `第${state.currentIndex + 1}問`;
   elements.populationBadge.textContent = `凡例｜人口区分：${state.bands.get(question.populationBand)}`;
   elements.questionSteps.setAttribute("aria-label", `全${QUESTION_COUNT}問中${state.currentIndex + 1}問目`);

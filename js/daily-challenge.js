@@ -108,6 +108,24 @@ function updateMobileLayout() {
   });
 }
 
+function keepQuizVisible() {
+  if (!document.body.classList.contains("is-daily-playing")) return;
+
+  window.requestAnimationFrame(() => {
+    const viewport = window.visualViewport;
+    const quizTop =
+      elements.quizView.getBoundingClientRect().top + window.scrollY;
+
+    const offsetTop = viewport?.offsetTop ?? 0;
+
+    window.scrollTo({
+      top: Math.max(0, quizTop - offsetTop - 8),
+      left: 0,
+      behavior: "instant",
+    });
+  });
+}
+
 function apiUrl(path) {
   const baseUrl = API_BASE_URL.replace(/\/$/, "");
   if (!baseUrl) throw new Error("API URLが未設定です");
@@ -488,3 +506,17 @@ loadChallenge().catch((error) => {
 window.visualViewport?.addEventListener("resize", updateMobileLayout);
 window.visualViewport?.addEventListener("scroll", updateMobileLayout);
 window.addEventListener("resize", updateMobileLayout);
+
+elements.answerInput.addEventListener("focus", () => {
+  updateMobileLayout();
+
+  setTimeout(() => {
+    keepQuizVisible();
+    updateMobileLayout();
+  }, 100);
+
+  setTimeout(() => {
+    keepQuizVisible();
+    updateMobileLayout();
+  }, 350);
+});

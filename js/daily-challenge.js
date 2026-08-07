@@ -86,6 +86,28 @@ const state = {
   layer: null,
 };
 
+function updateMobileLayout() {
+  if (!window.visualViewport) return;
+  if (!document.body.classList.contains("is-daily-playing")) return;
+
+  const viewportHeight = window.visualViewport.height;
+  const keyboardVisible = viewportHeight < window.innerHeight - 120;
+
+  document.documentElement.style.setProperty(
+    "--daily-visual-height",
+    `${viewportHeight}px`
+  );
+
+  document.body.classList.toggle(
+    "is-keyboard-visible",
+    keyboardVisible
+  );
+
+  window.requestAnimationFrame(() => {
+    map.invalidateSize();
+  });
+}
+
 function apiUrl(path) {
   const baseUrl = API_BASE_URL.replace(/\/$/, "");
   if (!baseUrl) throw new Error("API URLが未設定です");
@@ -220,7 +242,9 @@ function showQuestionIntro() {
 }
 
 function startChallenge() {
+  document.body.classList.add("is-daily-playing");
   elements.introView.hidden = true;
+  updateMobileLayout();
   showQuestionIntro();
 }
 
@@ -270,6 +294,9 @@ function renderResultList() {
 
 function showResults() {
   const { correctCount, totalTimeMs } = scoreSummary();
+  document.body.classList.remove("is-daily-playing");
+  document.body.classList.remove("is-keyboard-visible");
+  document.documentElement.style.removeProperty("--daily-visual-height");
   elements.quizView.hidden = true;
   elements.resultView.hidden = false;
   elements.resultScore.textContent = `${correctCount} / ${QUESTION_COUNT}`;
@@ -457,3 +484,7 @@ loadChallenge().catch((error) => {
   elements.dailyDate.textContent = "読み込みエラー";
   elements.loadStatus.textContent = `問題を準備できませんでした。${error.message}`;
 });
+
+window.visualViewport?.addEventListener("resize", updateMobileLayout);
+window.visualViewport?.addEventListener("scroll", updateMobileLayout);
+window.addEventListener("resize", updateMobileLayout);

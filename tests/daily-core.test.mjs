@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import {
   buildShareText,
+  isCloseAnswer,
   isCorrectAnswer,
   japanDateKey,
   normalizeMunicipalityName,
@@ -106,6 +107,42 @@ test("誤った都道府県名・郡名、ひらがなのみ、空文字は不�
   assert.equal(isCorrectAnswer("吾妻郡大泉町", oizumi), false);
   assert.equal(isCorrectAnswer("おおいずみまち", oizumi), false);
   assert.equal(isCorrectAnswer("　 ", oizumi), false);
+});
+
+test("惜しい判定は自治体名部分だけを文字数に応じた編集距離で比較する", () => {
+  const yokohama = { name: "横浜市", prefecture: "神奈川県", district: null };
+  const shortQuestions = {
+    tsu: { name: "津市", prefecture: "三重県", district: null },
+    asahi: { name: "旭市", prefecture: "千葉県", district: null },
+    warabi: { name: "蕨市", prefecture: "埼玉県", district: null },
+  };
+  const longName = { name: "南アルプス市", prefecture: "山梨県", district: null };
+  const cases = [
+    ["完全一致", "横浜市", yokohama, false],
+    ["1文字の誤字", "横浜氏", yokohama, true],
+    ["1文字抜け", "横浜", yokohama, true],
+    ["1文字余分", "横浜市市", yokohama, true],
+    ["都道府県名付きの誤字", "神奈川県横浜氏", yokohama, true],
+    ["誤った都道府県名", "東京都横浜市", yokohama, false],
+    ["全く違う自治体", "札幌市", yokohama, false],
+    ["別の似ていない市", "川崎市", yokohama, false],
+    ["空文字", "　", yokohama, false],
+    ["短い自治体の1文字違い（津市）", "津町", shortQuestions.tsu, false],
+    ["短い自治体の1文字抜け（津市）", "津", shortQuestions.tsu, false],
+    ["短い自治体の1文字違い（旭市）", "旭区", shortQuestions.asahi, false],
+    ["短い自治体の1文字違い（蕨市）", "蕨町", shortQuestions.warabi, false],
+    ["郡を持つ自治体の完全一致", "大泉町", oizumi, false],
+    ["郡なしの誤字", "大泉丁", oizumi, true],
+    ["郡名付きの誤字", "邑楽郡大泉丁", oizumi, true],
+    ["都道府県名と郡名付きの1文字抜け", "群馬県邑楽郡大泉", oizumi, true],
+    ["誤った郡名", "吾妻郡大泉町", oizumi, false],
+    ["NFKCと空白除去後の誤字", "群馬県　邑楽郡 大 泉 丁", oizumi, true],
+    ["6文字以上の自治体で2文字違い", "南アロブス市", longName, true],
+  ];
+
+  for (const [label, input, question, expected] of cases) {
+    assert.equal(isCloseAnswer(input, question), expected, label);
+  }
 });
 
 test("ランキング利用可能時のX投稿文は正式タイトルとURLを使う", () => {

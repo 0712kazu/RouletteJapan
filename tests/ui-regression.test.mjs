@@ -34,6 +34,17 @@ test("スマホの入力中と回答後を分離し、回答後は通常スク�
   assert.doesNotMatch(dailyCss, /body\.is-daily-playing\s*\{\s*overflow: hidden/);
 });
 
+test("惜しい表示と地図の初期表示復元をデイリー画面だけに追加する", () => {
+  assert.match(dailyHtml, /id="map-reset-button"[^>]*disabled>元に戻す<\/button>/);
+  assert.match(dailyHtml, /class="map-control-button daily-map-reset"/);
+  assert.doesNotMatch(dailyHtml, /class="map-reset"/);
+  assert.match(dailyScript, /isCloseAnswer\(input, question\)/);
+  assert.match(dailyScript, /feedbackTitle\.textContent = correct \? "正解！" : close \? "惜しい！" : "不正解"/);
+  assert.match(dailyScript, /initialMapView: null/);
+  assert.match(dailyScript, /map\.setView\(state\.initialMapView\.center, state\.initialMapView\.zoom/);
+  assert.match(dailyCss, /is-keyboard-visible \.map-controls/);
+});
+
 test("通常ルーレットの基本要素と全国自治体読込を維持する", () => {
   assert.match(rouletteHtml, /id="start-button"/);
   assert.match(rouletteHtml, /id="prefecture-select"/);

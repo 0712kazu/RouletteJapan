@@ -99,6 +99,58 @@ export function isCorrectAnswer(input, question) {
   return normalizedInput.length > 0 && acceptedAnswerForms(question).includes(normalizedInput);
 }
 
+function levenshteinDistance(left, right) {
+  if (left === right) return 0;
+  if (left.length === 0) return right.length;
+  if (right.length === 0) return left.length;
+
+  let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    const current = [leftIndex];
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const substitutionCost = left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1;
+      current[rightIndex] = Math.min(
+        current[rightIndex - 1] + 1,
+        previous[rightIndex] + 1,
+        previous[rightIndex - 1] + substitutionCost,
+      );
+    }
+    previous = current;
+  }
+  return previous[right.length];
+}
+
+function acceptedAnswerPrefixes(question) {
+  if (typeof question === "string") return [""];
+  if (!question || typeof question !== "object" || !question.name) return [];
+
+  const prefixes = ["", question.prefecture];
+  if (question.district) {
+    prefixes.push(question.district, `${question.prefecture ?? ""}${question.district}`);
+  }
+  return [...new Set(prefixes.map((prefix) => normalizeMunicipalityName(prefix)))];
+}
+
+export function isCloseAnswer(input, question) {
+  const normalizedInput = normalizeMunicipalityName(input);
+  const normalizedName = normalizeMunicipalityName(
+    typeof question === "string" ? question : question?.name
+  );
+
+  if (!normalizedInput || normalizedName.length <= 2 || isCorrectAnswer(input, question)) {
+    return false;
+  }
+
+  const maximumDistance = normalizedName.length >= 6 ? 2 : 1;
+  return acceptedAnswerPrefixes(question).some((prefix) => {
+    if (prefix && !normalizedInput.startsWith(prefix)) return false;
+    const municipalityPart = normalizedInput.slice(prefix.length);
+    if (!municipalityPart) return false;
+    if (Math.abs(municipalityPart.length - normalizedName.length) > maximumDistance) return false;
+    return levenshteinDistance(municipalityPart, normalizedName) <= maximumDistance;
+  });
+}
+
 export function formatElapsed(milliseconds) {
   return `${(Math.max(0, milliseconds) / 1000).toFixed(2)}秒`;
 }

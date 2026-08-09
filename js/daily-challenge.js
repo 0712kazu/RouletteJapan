@@ -1,6 +1,7 @@
 import {
   buildShareText,
   formatElapsed,
+  isCloseAnswer,
   isCorrectAnswer,
   japanDateKey,
   selectDailyQuestions,
@@ -27,6 +28,7 @@ const elements = {
   introRankingStatus: document.getElementById("intro-ranking-status"),
   loadStatus: document.querySelector("#load-status"),
   mapLoading: document.querySelector("#map-loading"),
+  mapResetButton: document.querySelector("#map-reset-button"),
   nextButton: document.querySelector("#next-button"),
   playerName: document.querySelector("#player-name"),
   populationBadge: document.querySelector("#population-badge"),
@@ -84,6 +86,7 @@ const state = {
   results: [],
   questionStartedAt: 0,
   layer: null,
+  initialMapView: null,
 };
 
 let mobileViewportBaseline = Math.max(
@@ -237,7 +240,25 @@ function showFeature(feature) {
   }).addTo(map);
   const bounds = state.layer.getBounds();
   if (bounds.isValid()) map.fitBounds(bounds.pad(0.18), { animate: false, maxZoom: 9 });
+  const center = map.getCenter();
+  state.initialMapView = {
+    center: [center.lat, center.lng],
+    zoom: map.getZoom(),
+  };
+  elements.mapResetButton.disabled = true;
   updateZoomOutButton();
+}
+
+function zoomOutMap() {
+  if (elements.zoomOutButton.disabled) return;
+  map.zoomOut();
+  elements.mapResetButton.disabled = false;
+}
+
+function resetMapView() {
+  if (!state.initialMapView) return;
+  map.setView(state.initialMapView.center, state.initialMapView.zoom, { animate: false });
+  elements.mapResetButton.disabled = true;
 }
 
 async function showQuestion() {
@@ -310,6 +331,7 @@ function submitAnswer(event) {
   const elapsedMs = Math.max(0, Math.round(performance.now() - state.questionStartedAt));
   const input = elements.answerInput.value;
   const correct = isCorrectAnswer(input, question);
+  const close = !correct && isCloseAnswer(input, question);
   state.results.push({ ...question, input, correct, elapsedMs });
 
   elements.answerInput.blur();
@@ -317,8 +339,8 @@ function submitAnswer(event) {
   elements.answerInput.disabled = true;
   elements.answerButton.disabled = true;
   elements.feedback.hidden = false;
-  elements.feedback.className = `feedback ${correct ? "is-correct" : "is-wrong"}`;
-  elements.feedbackTitle.textContent = correct ? "正解！" : "惜しい！";
+  elements.feedback.className = `feedback ${correct ? "is-correct" : close ? "is-close" : "is-wrong"}`;
+  elements.feedbackTitle.textContent = correct ? "正解！" : close ? "惜しい！" : "不正解";
   elements.feedbackAnswer.textContent = `答え：${question.prefecture} ${question.name}（${formatElapsed(elapsedMs)}）`;
   elements.nextButton.textContent = state.currentIndex === QUESTION_COUNT - 1 ? "結果を見る" : "次の問題へ";
   try {
@@ -535,7 +557,8 @@ elements.answerForm.addEventListener("submit", submitAnswer);
 elements.nextButton.addEventListener("click", goNext);
 elements.copyButton.addEventListener("click", copyShareText);
 elements.rankingForm.addEventListener("submit", submitRanking);
-elements.zoomOutButton.addEventListener("click", () => map.zoomOut());
+elements.zoomOutButton.addEventListener("click", zoomOutMap);
+elements.mapResetButton.addEventListener("click", resetMapView);
 
 loadChallenge().catch((error) => {
   elements.dailyDate.textContent = "読み込みエラー";

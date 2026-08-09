@@ -41,7 +41,7 @@ body {
 .answer-form label,
 .ranking-form label,
 .share-panel label,
-.map-zoom-out,
+.map-control-button,
 .daily-shell footer {
   font-family: inherit;
 }
@@ -274,13 +274,18 @@ body {
   background: #fff;
 }
 
-.map-zoom-out {
+.map-controls {
   position: absolute;
   z-index: 900;
   top: 12px;
   left: 12px;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.map-control-button {
   display: grid;
-  min-width: 48px;
   min-height: 48px;
   place-items: center;
   padding: 4px 8px;
@@ -294,16 +299,24 @@ body {
   line-height: 1;
 }
 
+.map-zoom-out {
+  min-width: 48px;
+}
+
+.daily-map-reset {
+  min-width: 76px;
+}
+
 .map-zoom-out span:first-child {
   font-size: 1.5rem;
 }
 
-.map-zoom-out:hover:not(:disabled) {
+.map-control-button:hover:not(:disabled) {
   color: #fff;
   background: var(--atlas-ink);
 }
 
-.map-zoom-out:disabled {
+.map-control-button:disabled {
   cursor: not-allowed;
   opacity: 0.4;
 }
@@ -427,6 +440,10 @@ body {
 
 .feedback.is-correct .feedback-title {
   color: var(--atlas-green);
+}
+
+.feedback.is-close .feedback-title {
+  color: #946116;
 }
 
 .feedback.is-wrong .feedback-title {
@@ -812,13 +829,25 @@ body {
     max-height: none;
   }
 
-  body.is-daily-answering.is-keyboard-visible .map-zoom-out {
+  body.is-daily-answering.is-keyboard-visible .map-controls {
     top: 4px;
     left: 4px;
+    gap: 3px;
+  }
+
+  body.is-daily-answering.is-keyboard-visible .map-control-button {
     min-width: 34px;
     min-height: 34px;
     padding: 2px 4px;
     font-size: 0.58rem;
+  }
+
+  body.is-daily-answering.is-keyboard-visible .daily-map-reset {
+    min-width: 58px;
+  }
+
+  body.is-daily-answering.is-keyboard-visible .map-zoom-out span:first-child {
+    font-size: 1rem;
   }
 
   body.is-daily-answering.is-keyboard-visible .answer-form {

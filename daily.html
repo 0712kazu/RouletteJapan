@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/daily.css?v=7">
+    <link rel="stylesheet" href="css/daily.css?v=8">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   </head>
   <body>
@@ -69,9 +69,12 @@
         </div>
         <div class="daily-map-panel">
           <div id="daily-map" role="img" aria-label="出題される市区町村の形"></div>
-          <button id="zoom-out-button" class="map-zoom-out" type="button" aria-label="地図を縮小">
-            <span aria-hidden="true">−</span><span>縮小</span>
-          </button>
+          <div class="map-controls">
+            <button id="zoom-out-button" class="map-control-button map-zoom-out" type="button" aria-label="地図を縮小">
+              <span aria-hidden="true">−</span><span>縮小</span>
+            </button>
+            <button id="map-reset-button" class="map-control-button daily-map-reset" type="button" disabled>元に戻す</button>
+          </div>
           <div id="map-loading" class="map-loading" role="status">地図を準備しています…</div>
         </div>
         <form id="answer-form" class="answer-form" autocomplete="off">
@@ -127,6 +130,6 @@
         <p>人口区分：総務省統計局「令和2年国勢調査」をもとに分類。境界データ：国土交通省「国土数値情報」を加工。</p>
       </footer>
     </main>
-    <script type="module" src="js/daily-challenge.js?v=7"></script>
+    <script type="module" src="js/daily-challenge.js?v=8"></script>
   </body>
 </html>

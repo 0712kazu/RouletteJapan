@@ -86,15 +86,56 @@ const state = {
   layer: null,
 };
 
+let mobileViewportBaseline = Math.max(
+  window.innerHeight,
+  window.visualViewport?.height ?? 0
+);
+
+function clearKeyboardLayout() {
+  document.body.classList.remove("is-keyboard-visible");
+  document.documentElement.style.removeProperty("--daily-visual-height");
+  document.documentElement.style.removeProperty("--daily-visual-top");
+}
+
+function setQuizPhase(phase) {
+  const isAnswering = phase === "answering";
+  document.body.classList.toggle("is-daily-answering", isAnswering);
+  document.body.classList.toggle("is-answer-feedback", phase === "feedback");
+
+  if (!isAnswering) {
+    clearKeyboardLayout();
+    mobileViewportBaseline = Math.max(
+      window.innerHeight,
+      window.visualViewport?.height ?? 0
+    );
+  }
+}
+
 function updateMobileLayout() {
-  if (!document.body.classList.contains("is-daily-playing")) return;
+  const isAnswering = document.body.classList.contains("is-daily-answering");
+  const isMobile = window.matchMedia("(max-width: 640px)").matches;
+
+  if (!isAnswering || !isMobile) {
+    clearKeyboardLayout();
+    return;
+  }
 
   const viewport = window.visualViewport;
   const viewportHeight = viewport?.height ?? window.innerHeight;
   const viewportTop = viewport?.offsetTop ?? 0;
-  const keyboardVisible = viewport
-    ? viewportHeight < window.innerHeight - 120
-    : false;
+  const inputFocused = document.activeElement === elements.answerInput;
+
+  if (!inputFocused) {
+    mobileViewportBaseline = Math.max(
+      mobileViewportBaseline,
+      window.innerHeight,
+      viewportHeight
+    );
+  }
+
+  const keyboardThreshold = Math.max(100, mobileViewportBaseline * 0.15);
+  const keyboardVisible = inputFocused
+    && mobileViewportBaseline - viewportHeight > keyboardThreshold;
 
   document.documentElement.style.setProperty(
     "--daily-visual-height",
@@ -105,11 +146,12 @@ function updateMobileLayout() {
     `${viewportTop}px`
   );
 
+  const wasKeyboardVisible = document.body.classList.contains("is-keyboard-visible");
   document.body.classList.toggle("is-keyboard-visible", keyboardVisible);
 
-  window.requestAnimationFrame(() => {
-    map.invalidateSize();
-  });
+  if (wasKeyboardVisible !== keyboardVisible) {
+    window.requestAnimationFrame(() => map.invalidateSize());
+  }
 }
 
 function apiUrl(path) {
@@ -223,6 +265,11 @@ async function showQuestion() {
     elements.answerInput.disabled = false;
     elements.answerButton.disabled = false;
     state.questionStartedAt = performance.now();
+    mobileViewportBaseline = Math.max(
+      window.innerHeight,
+      window.visualViewport?.height ?? 0
+    );
+    setQuizPhase("answering");
     try {
       elements.answerInput.focus({ preventScroll: true });
     } catch {
@@ -234,6 +281,7 @@ async function showQuestion() {
 }
 
 function showQuestionIntro() {
+  setQuizPhase("intro");
   elements.quizView.hidden = true;
   elements.questionIntroText.textContent = `第${state.currentIndex + 1}問！`;
   elements.questionIntroView.hidden = false;
@@ -252,7 +300,6 @@ function showQuestionIntro() {
 function startChallenge() {
   document.body.classList.add("is-daily-playing");
   elements.introView.hidden = true;
-  updateMobileLayout();
   showQuestionIntro();
 }
 
@@ -265,6 +312,8 @@ function submitAnswer(event) {
   const correct = isCorrectAnswer(input, question);
   state.results.push({ ...question, input, correct, elapsedMs });
 
+  elements.answerInput.blur();
+  setQuizPhase("feedback");
   elements.answerInput.disabled = true;
   elements.answerButton.disabled = true;
   elements.feedback.hidden = false;
@@ -277,9 +326,14 @@ function submitAnswer(event) {
   } catch {
     elements.nextButton.focus();
   }
+  window.requestAnimationFrame(() => {
+    elements.feedback.scrollIntoView({ block: "nearest" });
+    map.invalidateSize();
+  });
 }
 
 function goNext() {
+  setQuizPhase("intro");
   state.currentIndex += 1;
   if (state.currentIndex < QUESTION_COUNT) {
     showQuestionIntro();
@@ -306,10 +360,8 @@ function renderResultList() {
 
 function showResults() {
   const { correctCount, totalTimeMs } = scoreSummary();
+  setQuizPhase("results");
   document.body.classList.remove("is-daily-playing");
-  document.body.classList.remove("is-keyboard-visible");
-  document.documentElement.style.removeProperty("--daily-visual-height");
-  document.documentElement.style.removeProperty("--daily-visual-top");
   elements.quizView.hidden = true;
   elements.resultView.hidden = false;
   elements.resultScore.textContent = `${correctCount} / ${QUESTION_COUNT}`;
@@ -494,3 +546,4 @@ window.visualViewport?.addEventListener("resize", updateMobileLayout);
 window.visualViewport?.addEventListener("scroll", updateMobileLayout);
 window.addEventListener("resize", updateMobileLayout);
 elements.answerInput.addEventListener("focus", updateMobileLayout);
+elements.answerInput.addEventListener("blur", updateMobileLayout);

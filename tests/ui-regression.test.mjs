@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 
 const dailyHtml = await readFile(new URL("../daily.html", import.meta.url), "utf8");
 const dailyCss = await readFile(new URL("../css/daily.css", import.meta.url), "utf8");
+const dailyScript = await readFile(new URL("../js/daily-challenge.js", import.meta.url), "utf8");
 const rouletteHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const rouletteScript = await readFile(new URL("../js/roulette.js", import.meta.url), "utf8");
 
@@ -23,6 +24,14 @@ test("デイリー画面はM PLUS Rounded 1cを読み込み、入力必須と時
   assert.match(dailyCss, /font-family: "M PLUS Rounded 1c"/);
   assert.match(dailyHtml, /id="municipality-answer"[^>]*required/);
   assert.doesNotMatch(dailyHtml, /id="countdown"|回答制限時間/);
+});
+
+test("スマホの入力中と回答後を分離し、回答後は通常スクロールへ戻す", () => {
+  assert.match(dailyScript, /setQuizPhase\("answering"\)/);
+  assert.match(dailyScript, /elements\.answerInput\.blur\(\);\s+setQuizPhase\("feedback"\)/);
+  assert.match(dailyCss, /body\.is-daily-answering\.is-keyboard-visible \.daily-quiz/);
+  assert.match(dailyCss, /body\.is-answer-feedback[\s\S]*overflow: visible/);
+  assert.doesNotMatch(dailyCss, /body\.is-daily-playing\s*\{\s*overflow: hidden/);
 });
 
 test("通常ルーレットの基本要素と全国自治体読込を維持する", () => {

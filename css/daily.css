@@ -672,21 +672,11 @@ body {
     border-left: 0;
   }
 
-  body.is-daily-playing {
-    overflow: hidden;
-  }
-
   body.is-daily-playing .daily-shell {
-    position: fixed;
-    z-index: 1200;
-    top: var(--daily-visual-top, 0px);
-    left: 0;
     width: 100%;
     max-width: none;
-    height: var(--daily-visual-height, 100dvh);
     margin: 0;
     padding: 0;
-    overflow: hidden;
   }
 
   body.is-daily-playing .daily-shell .app-header,
@@ -707,10 +697,8 @@ body {
   body.is-daily-playing .daily-quiz {
     box-sizing: border-box;
     width: 100%;
-    height: 100%;
     margin: 0;
     padding: 8px 10px 10px;
-    overflow: hidden;
     border-top: 3px double var(--atlas-ink);
     box-shadow: none;
   }
@@ -755,11 +743,29 @@ body {
     min-height: 40px;
   }
 
-  body.is-daily-playing.is-keyboard-visible .daily-quiz {
-    padding: 7px 8px 5px;
+  body.is-daily-answering.is-keyboard-visible {
+    overflow: hidden;
   }
 
-  body.is-daily-playing.is-keyboard-visible .daily-status-row {
+  body.is-daily-answering.is-keyboard-visible .daily-shell {
+    position: fixed;
+    z-index: 1200;
+    top: var(--daily-visual-top, 0px);
+    left: 0;
+    height: var(--daily-visual-height, 100dvh);
+    overflow: hidden;
+  }
+
+  body.is-daily-answering.is-keyboard-visible .daily-quiz {
+    display: grid;
+    grid-template-rows: auto auto minmax(72px, 1fr) auto;
+    gap: 3px;
+    height: 100%;
+    padding: 7px 8px 5px;
+    overflow: hidden;
+  }
+
+  body.is-daily-answering.is-keyboard-visible .daily-status-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -768,42 +774,45 @@ body {
     padding-bottom: 3px;
   }
 
-  body.is-daily-playing.is-keyboard-visible .daily-status-row h2 {
+  body.is-daily-answering.is-keyboard-visible .daily-status-row h2 {
     margin: 0;
     font-size: 0.82rem;
     line-height: 1.1;
   }
 
-  body.is-daily-playing.is-keyboard-visible .daily-status-row .eyebrow {
+  body.is-daily-answering.is-keyboard-visible .daily-status-row .eyebrow {
     margin: 0;
     font-size: 0.6rem;
   }
 
-  body.is-daily-playing.is-keyboard-visible .population-badge {
+  body.is-daily-answering.is-keyboard-visible .population-badge {
     font-size: 0.58rem;
     line-height: 1.1;
     white-space: normal;
   }
 
-  body.is-daily-playing.is-keyboard-visible .question-steps {
+  body.is-daily-answering.is-keyboard-visible .question-steps {
     grid-template-columns: repeat(5, 22px);
     gap: 3px;
     margin: 3px 0;
   }
 
-  body.is-daily-playing.is-keyboard-visible .question-steps span {
+  body.is-daily-answering.is-keyboard-visible .question-steps span {
     height: 22px;
     font-size: 0.6rem;
   }
 
-  body.is-daily-playing.is-keyboard-visible #daily-map {
-    --keyboard-map-height: clamp(84px, calc(var(--daily-visual-height) - 230px), 112px);
-    height: var(--keyboard-map-height);
-    min-height: var(--keyboard-map-height);
-    max-height: var(--keyboard-map-height);
+  body.is-daily-answering.is-keyboard-visible .daily-map-panel {
+    min-height: 0;
   }
 
-  body.is-daily-playing.is-keyboard-visible .map-zoom-out {
+  body.is-daily-answering.is-keyboard-visible #daily-map {
+    height: 100%;
+    min-height: 72px;
+    max-height: none;
+  }
+
+  body.is-daily-answering.is-keyboard-visible .map-zoom-out {
     top: 4px;
     left: 4px;
     min-width: 34px;
@@ -812,33 +821,40 @@ body {
     font-size: 0.58rem;
   }
 
-  body.is-daily-playing.is-keyboard-visible .answer-form {
+  body.is-daily-answering.is-keyboard-visible .answer-form {
     gap: 2px;
     margin-top: 3px;
   }
 
-  body.is-daily-playing.is-keyboard-visible .answer-form label {
+  body.is-daily-answering.is-keyboard-visible .answer-form label {
     padding: 2px 5px;
     font-size: 0.58rem;
   }
 
-  body.is-daily-playing.is-keyboard-visible .answer-row {
+  body.is-daily-answering.is-keyboard-visible .answer-row {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 5px;
   }
 
-  body.is-daily-playing.is-keyboard-visible .answer-row input {
+  body.is-daily-answering.is-keyboard-visible .answer-row input {
     min-width: 0;
     min-height: 36px;
     padding: 3px 4px;
     font-size: 16px;
   }
 
-  body.is-daily-playing.is-keyboard-visible .answer-row .start-button {
+  body.is-daily-answering.is-keyboard-visible .answer-row .start-button {
     width: auto;
     min-height: 36px;
     padding: 3px 8px;
     font-size: 0.68rem;
+  }
+
+  body.is-answer-feedback,
+  body.is-answer-feedback .daily-shell,
+  body.is-answer-feedback .daily-quiz {
+    height: auto;
+    overflow: visible;
   }
 }
 

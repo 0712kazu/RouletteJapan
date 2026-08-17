@@ -45,7 +45,7 @@ function allowedOrigins(env: Env): Set<string> {
 function corsHeaders(request: Request, env: Env): Headers {
   const headers = new Headers({
     "access-control-allow-headers": "content-type",
-    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-methods": "GET, POST, PATCH, OPTIONS",
     "access-control-max-age": "86400",
     "content-type": "application/json; charset=utf-8",
     "vary": "Origin",
@@ -182,11 +182,70 @@ async function handleScore(request: Request, env: Env): Promise<Response> {
   }, 201);
 }
 
+async function handleScoreNameUpdate(request: Request, env: Env, id: number): Promise<Response> {
+  if (!request.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+    return json(request, env, { error: "Content-Typeはapplication/jsonにしてください" }, 415);
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return json(request, env, { error: "JSONが不正です" }, 400);
+  }
+
+  const input = body && typeof body === "object" ? body as Record<string, unknown> : {};
+  const playerName = typeof input.player_name === "string" ? input.player_name.trim() : "";
+  const playerNameLength = Array.from(playerName).length;
+  if (playerNameLength < 1 || playerNameLength > 20) {
+    return json(request, env, { error: "player_nameは1文字以上20文字以内にしてください" }, 400);
+  }
+
+  const score = await env.DB.prepare(`
+    SELECT id, play_date, player_name, correct_count, total_time_ms, created_at
+    FROM daily_scores
+    WHERE id = ?
+  `).bind(id).first<ScoreRow>();
+  if (!score) return json(request, env, { error: "記録が見つかりません" }, 404);
+
+  await env.DB.prepare(`
+    UPDATE daily_scores
+    SET player_name = ?
+    WHERE id = ?
+  `).bind(playerName, id).run();
+
+  const rankRow = await env.DB.prepare(`
+    SELECT COUNT(*) + 1 AS rank
+    FROM daily_scores
+    WHERE play_date = ? AND (
+      correct_count > ? OR
+      (correct_count = ? AND total_time_ms < ?)
+    )
+  `).bind(
+    score.play_date,
+    score.correct_count,
+    score.correct_count,
+    score.total_time_ms,
+  ).first<RankRow>();
+  const top = await getTopScore(env, score.play_date);
+
+  return json(request, env, {
+    status: "ok",
+    score: { ...score, player_name: playerName },
+    rank: rankRow?.rank ?? null,
+    top,
+  });
+}
+
 async function route(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   if (request.method === "GET" && url.pathname === "/health") return handleHealth(request, env);
   if (request.method === "GET" && url.pathname === "/ranking") return handleRanking(request, env, url);
   if (request.method === "POST" && url.pathname === "/score") return handleScore(request, env);
+  const scorePathMatch = url.pathname.match(/^\/score\/(\d+)$/);
+  if (request.method === "PATCH" && scorePathMatch) {
+    return handleScoreNameUpdate(request, env, Number(scorePathMatch[1]));
+  }
   return json(request, env, { error: "Not found" }, 404);
 }
 

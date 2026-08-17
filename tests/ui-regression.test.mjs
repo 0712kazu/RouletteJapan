@@ -34,6 +34,14 @@ test("スマホの入力中と回答後を分離し、回答後は通常スク�
   assert.doesNotMatch(dailyCss, /body\.is-daily-playing\s*\{\s*overflow: hidden/);
 });
 
+test("結果はデフォルト名で自動登録し、既存フォームでは同じ記録の表示名を変更する", () => {
+  assert.match(dailyHtml, /id="player-name"[^>]*value="名無しの地図好き"/);
+  assert.match(dailyScript, /const DEFAULT_PLAYER_NAME = "名無しの地図好き"/);
+  assert.match(dailyScript, /state\.rankingSubmission = submitDefaultRanking\(\)/);
+  assert.match(dailyScript, /method: "PATCH"/);
+  assert.match(dailyScript, /apiUrl\(`\/score\/\$\{state\.rankingScoreId\}`\)/);
+});
+
 test("惜しい表示と地図の初期表示復元をデイリー画面だけに追加する", () => {
   assert.match(dailyHtml, /id="map-reset-button"[^>]*disabled>元に戻す<\/button>/);
   assert.match(dailyHtml, /class="map-control-button daily-map-reset"/);

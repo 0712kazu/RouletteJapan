@@ -10,6 +10,7 @@ import { API_BASE_URL } from "./api-config.mjs";
 
 const QUESTION_COUNT = 5;
 const QUESTION_INTRO_MS = 2000;
+const DEFAULT_PLAYER_NAME = "名無しの地図好き";
 const RANKING_UNAVAILABLE_MESSAGE = "ランキングは現在利用できません。クイズは通常どおり遊べます。";
 const JAPAN_BOUNDS = L.latLngBounds([20.2, 122.8], [46.2, 154.1]);
 
@@ -87,6 +88,8 @@ const state = {
   questionStartedAt: 0,
   layer: null,
   initialMapView: null,
+  rankingScoreId: null,
+  rankingSubmission: null,
 };
 
 let mobileViewportBaseline = Math.max(
@@ -391,7 +394,8 @@ function showResults() {
   renderResultList();
 
   updateShareText({ top: loadSavedTopScore(), rankingAvailable: false });
-  loadRanking();
+  elements.playerName.value = DEFAULT_PLAYER_NAME;
+  state.rankingSubmission = submitDefaultRanking();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -512,28 +516,74 @@ async function loadRanking(rank = null) {
   }
 }
 
+function rankingScoreBody(playerName) {
+  const { correctCount, totalTimeMs } = scoreSummary();
+  return {
+    play_date: state.dateKey,
+    player_name: playerName,
+    correct_count: correctCount,
+    total_time_ms: totalTimeMs,
+  };
+}
+
+async function createRankingScore(playerName) {
+  return fetchJson(apiUrl("/score"), {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(rankingScoreBody(playerName)),
+  });
+}
+
+async function updateRankingName(playerName) {
+  return fetchJson(apiUrl(`/score/${state.rankingScoreId}`), {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ player_name: playerName }),
+  });
+}
+
+async function applyRankingResult(payload, message) {
+  const scoreId = Number(payload.score?.id);
+  if (Number.isInteger(scoreId) && scoreId > 0) state.rankingScoreId = scoreId;
+  saveTopScore(payload.top);
+  renderRankingSummary({ rank: payload.rank, top: payload.top });
+  await loadRanking(payload.rank);
+  elements.rankingStatus.textContent = message;
+}
+
+async function submitDefaultRanking() {
+  const submitButton = elements.rankingForm.querySelector("button");
+  submitButton.disabled = true;
+  elements.rankingStatus.textContent = `${DEFAULT_PLAYER_NAME}として結果を登録しています…`;
+
+  try {
+    const payload = await createRankingScore(DEFAULT_PLAYER_NAME);
+    await applyRankingResult(payload, `${DEFAULT_PLAYER_NAME}として結果を登録しました。表示名は変更できます。`);
+  } catch (error) {
+    console.info("ランキングへ自動登録できませんでした。", error.message);
+    showRankingUnavailable();
+  } finally {
+    submitButton.disabled = false;
+  }
+}
+
 async function submitRanking(event) {
   event.preventDefault();
   const submitButton = elements.rankingForm.querySelector("button");
   submitButton.disabled = true;
-  elements.rankingStatus.textContent = "結果を登録しています…";
-  const { correctCount, totalTimeMs } = scoreSummary();
+  elements.rankingStatus.textContent = "表示名を反映しています…";
+  const playerName = elements.playerName.value.trim() || DEFAULT_PLAYER_NAME;
 
   try {
-    const payload = await fetchJson(apiUrl("/score"), {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        play_date: state.dateKey,
-        player_name: elements.playerName.value.trim() || "ゲスト",
-        correct_count: correctCount,
-        total_time_ms: totalTimeMs,
-      }),
-    });
-    saveTopScore(payload.top);
-    renderRankingSummary({ rank: payload.rank, top: payload.top });
-    elements.rankingStatus.textContent = "結果を登録しました。";
-    await loadRanking(payload.rank);
+    await state.rankingSubmission;
+    const updatingExistingScore = Boolean(state.rankingScoreId);
+    const payload = updatingExistingScore
+      ? await updateRankingName(playerName)
+      : await createRankingScore(playerName);
+    await applyRankingResult(
+      payload,
+      updatingExistingScore ? "表示名を変更しました。" : "結果を登録しました。"
+    );
   } catch (error) {
     console.info("ランキングへ登録できませんでした。", error.message);
     showRankingUnavailable();

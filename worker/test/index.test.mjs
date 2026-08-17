@@ -132,6 +132,53 @@ test("POST /score は全値をバインドして登録し順位とトップを�
   assert.equal(prepared.length, 3);
 });
 
+test("PATCH /score/:id は同じ記録の表示名だけを変更する", async () => {
+  const existing = {
+    id: 42,
+    play_date: "2026-08-06",
+    player_name: "ゲスト",
+    correct_count: 4,
+    total_time_ms: 24310,
+    created_at: "2026-08-06T00:00:00.000Z",
+  };
+  const DB = {
+    prepare(sql) {
+      if (sql.includes("WHERE id = ?") && sql.includes("SELECT id")) {
+        return { bind(id) {
+          assert.equal(id, 42);
+          return { first: async () => existing };
+        } };
+      }
+      if (sql.includes("UPDATE daily_scores")) {
+        return { bind(name, id) {
+          assert.deepEqual([name, id], ["まち探偵", 42]);
+          return { run: async () => ({ success: true }) };
+        } };
+      }
+      if (sql.includes("COUNT(*)")) {
+        return { bind(...values) {
+          assert.deepEqual(values, ["2026-08-06", 4, 4, 24310]);
+          return { first: async () => ({ rank: 8 }) };
+        } };
+      }
+      return { bind(date, limit) {
+        assert.deepEqual([date, limit], ["2026-08-06", 1]);
+        return { first: async () => ({ ...existing, player_name: "TOP", correct_count: 5, total_time_ms: 10000 }) };
+      } };
+    },
+  };
+  const response = await worker.fetch(new Request("https://api.example/score/42", {
+    method: "PATCH",
+    headers: { "content-type": "application/json", origin: "http://localhost:8000" },
+    body: JSON.stringify({ player_name: " まち探偵 " }),
+  }), allowedEnv(DB));
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.score.id, 42);
+  assert.equal(body.score.player_name, "まち探偵");
+  assert.equal(body.rank, 8);
+});
+
 test("許可されていないOriginにはCORSヘッダーを返さない", async () => {
   const DB = { prepare() { return { bind() { return { first: async () => ({ ok: 1 }) }; } }; } };
   const request = new Request("https://api.example/health", { headers: { origin: "https://evil.example" } });
